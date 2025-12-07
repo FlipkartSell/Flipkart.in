@@ -55,7 +55,7 @@
                 <button class="view-all">VIEW ALL</button>
             </div>
             <div class="product-grid" id="product-container">
-                <!-- Products loaded via JS -->
+               <!-- Products loaded via JS -->
             </div>
         </div>
 
@@ -129,7 +129,8 @@
                     <button class="btn-continue" onclick="goToPayment()">DELIVER HERE</button>
                 </div>
             </div>
- <!-- Step 2: Payment (Hidden initially) -->
+
+            <!-- Step 2: Payment (Hidden initially) -->
             <div id="step-payment" class="hidden">
                 <div class="checkout-header">
                     <span class="step-number">2</span> Payment Options
@@ -160,7 +161,7 @@
                     </div>
                 </div>
 
-                <button class="btn-pay" onclick="processPayment()">PAY NOW</button>
+                <button class="btn-pay" onclick="processRazorpayPayment()">PAY NOW</button>
                 <button class="btn-back" onclick="backToAddress()">Change Address</button>
             </div>
         </div>
@@ -173,6 +174,8 @@
         </div>
     </div>
 
+    <!-- RAZORPAY SDK ADDED HERE -->
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
