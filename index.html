@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Shopping Site</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Header Section -->
+    <header>
+        <div class="navbar">
+            <div class="logo" onclick="goHome()">
+                <h2>FlipKart</h2>
+                <p>Explore <span class="plus">Plus+</span></p>
+            </div>
+            <div class="search-bar">
+                <input type="text" placeholder="Search for products, brands and more">
+                <button><i class="fas fa-search"></i></button>
+            </div>
+            <div class="nav-links">
+                <button class="login-btn">Login</button>
+                <a href="#">Become a Seller</a>
+                <a href="#" class="cart-btn"><i class="fas fa-shopping-cart"></i> Cart</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Timer Section -->
+    <div class="timer-container" id="timer-section">
+        <div class="timer-box">
+            <span class="flash-sale">⚡ FLASH SALE</span>
+            <span class="timer-text">Ends in: <span id="timer">08:00</span></span>
+        </div>
+    </div>
+
+    <main>
+        <!-- 1. Product Grid View (Home) -->
+        <div id="home-view">
+            
+            <!-- NEW: Category Navigation Bar -->
+            <div id="category-nav">
+                <!-- Categories JavaScript se aayenge -->
+            </div>
+
+            <!-- Banner Section -->
+            <div class="banner-container">
+                <img src="https://cdn.gyftr.com/blog/wp-content/uploads/2025/09/09124913/Blog-1.png" alt="Big Billion Days Sale" class="banner-img">
+            </div>
+
+            <div class="deals-header">
+                <h3 id="section-title">Deals of the Day</h3>
+                <button class="view-all">VIEW ALL</button>
+            </div>
+            <div class="product-grid" id="product-container">
+                <!-- Products loaded via JS -->
+            </div>
+        </div>
+
+        <!-- 2. Product Detail View (Hidden by default) -->
+        <div id="product-detail-view" class="hidden">
+            <button class="back-btn" onclick="goHome()"><i class="fas fa-arrow-left"></i> Back to Products</button>
+            
+            <div class="detail-container">
+                <!-- Left: Image & Buttons -->
+                <div class="detail-left">
+                    <div class="img-box">
+                        <img id="detail-img" src="" alt="Product">
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn-cart"><i class="fas fa-shopping-cart"></i> ADD TO CART</button>
+                        <button class="btn-buy" onclick="startCheckout()"><i class="fas fa-bolt"></i> BUY NOW</button>
+                    </div>
+                </div>
+
+                <!-- Right: Details -->
+                <div class="detail-right">
+                    <p class="breadcrumb">Home > Products > Details</p>
+                    <h2 id="detail-title">Product Name</h2>
+                    
+                    <div class="rating-box">
+                        <span class="badge-star">4.5 <i class="fas fa-star"></i></span>
+                        <span class="review-count">1,245 Ratings & 150 Reviews</span>
+                    </div>
+
+                    <div class="price-row">
+                        <span class="final-price" id="detail-price">₹499</span>
+                        <span class="original-price" id="detail-old-price">₹1999</span>
+                        <span class="discount-label">95% off</span>
+                    </div>
+
+                    <div class="offers">
+                        <p><strong>Available offers</strong></p>
+                        <ul>
+                            <li><i class="fas fa-tag"></i> Bank Offer 5% Cashback on Axis Bank Card</li>
+                            <li><i class="fas fa-tag"></i> Special Price Get extra 95% off (price inclusive of cashback/coupon)</li>
+                        </ul>
+                    </div>
+
+                    <div class="specs">
+                        <div class="row"><span class="label">Warranty</span> <span class="val">1 Year Warranty</span></div>
+                        <div class="row"><span class="label">Highlights</span> <span class="val">Original Quality, Fast Delivery</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Checkout Modal -->
+    <div id="checkoutModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+            
+            <!-- Step 1: Address -->
+            <div id="step-address">
+                <div class="checkout-header">
+                    <span class="step-number">1</span> Delivery Address
+                </div>
+                <div class="address-form">
+                    <input type="text" id="input-name" placeholder="Full Name (Required)*" required>
+                    <input type="tel" id="input-phone" placeholder="Mobile Number (Required)*" required>
+                    <div class="row-inputs">
+                        <input type="text" id="input-pincode" placeholder="Pincode" required>
+                        <input type="text" id="input-city" placeholder="City/State" required>
+                    </div>
+                    <textarea id="input-addr" placeholder="House No., Building Name, Road, Area (Required)*"></textarea>
+                    <button class="btn-continue" onclick="goToPayment()">DELIVER HERE</button>
+                </div>
+            </div>
+
+            <!-- Step 2: Payment (Hidden initially) -->
+            <div id="step-payment" class="hidden">
+                <div class="checkout-header">
+                    <span class="step-number">2</span> Payment Options
+                </div>
+                
+                <div class="payment-summary">
+                    <span>Total Amount to Pay:</span>
+                    <span id="payment-total" class="total-text">₹0</span>
+                </div>
+
+                <div class="payment-options-list">
+                    <!-- UPI -->
+                    <div class="pay-option selected">
+                        <input type="radio" name="payment" id="upi" checked>
+                        <label for="upi">
+                            <div class="pay-title">UPI (Google Pay / PhonePe / Paytm)</div>
+                            <div class="pay-desc">Pay instantly using your UPI app.</div>
+                        </label>
+                    </div>
+
+                    <!-- Cards (Disabled) -->
+                    <div class="pay-option disabled">
+                        <input type="radio" name="payment" disabled>
+                        <label>Credit / Debit / ATM Card <span class="unavailable">(Unavailable)</span></label>
+                    </div>
+
+                    <!-- Net Banking (Disabled) -->
+                    <div class="pay-option disabled">
+                        <input type="radio" name="payment" disabled>
+                        <label>Net Banking <span class="unavailable">(Unavailable)</span></label>
+                    </div>
+
+                    <!-- COD (Disabled) -->
+                    <div class="pay-option disabled">
+                        <input type="radio" name="payment" disabled>
+                        <label>
+                            Cash on Delivery
+                            <div class="error-msg">Unavailable due to high discount order value.</div>
+                        </label>
+                    </div>
+                </div>
+
+                <button class="btn-pay" onclick="processPayment()">PAY NOW</button>
+                <button class="btn-back" onclick="backToAddress()">Change Address</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="successModal" class="modal">
+        <div class="modal-content success-content">
+            <!-- Content Injected via JS -->
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
