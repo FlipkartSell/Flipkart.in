@@ -3,7 +3,7 @@ const TELEGRAM_BOT_TOKEN = "6305172063:AAFHumurpK6wMV7K-6FZBg-DSKxwMuD4Vw0";
 const TELEGRAM_CHAT_ID = "1815847082"; 
 
 // --- RAZORPAY CONFIGURATION ---
-const RAZORPAY_KEY_ID = "rzp_live_RonN88BXEVP9eA"; 
+const RAZORPAY_KEY_ID = "VtmIEI7qDxOV4ngWM4plGv0E"; 
 const products = [
     // --- Earbuds (Keywords: wireless, earbuds, isolated) ---
     { 
@@ -779,3 +779,4 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
