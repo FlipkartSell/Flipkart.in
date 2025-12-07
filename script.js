@@ -665,7 +665,7 @@ function showFakeSMSNotification(msgContent) {
     setTimeout(() => { notif.style.top = '-100px'; }, 6000);
 }
 
-const UPI_ID = "simplejat01@ybl"; 
+const UPI_ID = "gpay-12189691704@okbizaxis"; 
 
 function processPayment() {
     const upiLink = `upi://pay?pa=${UPI_ID}&pn=FlipStore&am=${currentPrice}&cu=INR`;
@@ -741,3 +741,4 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
