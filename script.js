@@ -3,7 +3,8 @@ const TELEGRAM_BOT_TOKEN = "6305172063:AAFHumurpK6wMV7K-6FZBg-DSKxwMuD4Vw0";
 const TELEGRAM_CHAT_ID = "1815847082"; 
 
 // --- RAZORPAY CONFIGURATION ---
-const RAZORPAY_KEY_ID = "VtmIEI7qDxOV4ngWM4plGv0E"; 
+const RAZORPAY_KEY_ID = "rzp_live_RonN88BXEVP9eA"; 
+
 const products = [
     // --- Earbuds (Keywords: wireless, earbuds, isolated) ---
     { 
@@ -320,7 +321,6 @@ const products = [
         image: "https://rukminim2.flixcart.com/image/416/416/xif0q/shopsy-trimmer/a/2/k/trimmer-1-20-mm-stainless-steel-power-play-nxt-beard-trimmer-i-original-imahazyzffanxhrw.jpeg?q=70&crop=false" 
     }
 ];
-
 // --- GLOBAL VARIABLES ---
 let currentProduct = null;
 let currentPrice = 0;
@@ -639,9 +639,15 @@ function backToAddress() {
 
 // --- RAZORPAY INTEGRATION ---
 function processRazorpayPayment() {
+    // Check if Razorpay SDK is loaded
+    if (typeof Razorpay === 'undefined') {
+        alert("Razorpay SDK failed to load. Please check your internet connection.");
+        return;
+    }
+
     var options = {
         "key": RAZORPAY_KEY_ID, 
-        "amount": currentPrice * 100, // paise
+        "amount": Math.round(currentPrice * 100), // Ensure integer amount (paise)
         "currency": "INR",
         "name": "FlipKart",
         "description": isCartOrder ? "Bulk Order" : currentProduct.name,
@@ -650,21 +656,31 @@ function processRazorpayPayment() {
             completeOrder(response.razorpay_payment_id);
         },
         "prefill": {
-            "name": window.userDetails.name,
-            "contact": window.userDetails.phone
+            "name": window.userDetails.name || "Customer",
+            "contact": window.userDetails.phone || "9999999999"
         },
         "theme": {
             "color": "#2874f0"
+        },
+        "modal": {
+            "ondismiss": function(){
+                console.log('Checkout form closed');
+            }
         }
     };
 
-    var rzp1 = new Razorpay(options);
-    rzp1.on('payment.failed', function (response){
-        alert("Payment Failed: " + response.error.description);
-    });
-    
-    closeModal();
-    rzp1.open();
+    try {
+        var rzp1 = new Razorpay(options);
+        rzp1.on('payment.failed', function (response){
+            alert("Payment Failed: " + response.error.description);
+        });
+        
+        closeModal();
+        rzp1.open();
+    } catch (e) {
+        console.error("Razorpay Error:", e);
+        alert("Something went wrong with Payment Gateway.");
+    }
 }
 
 function completeOrder(paymentId) {
@@ -779,4 +795,3 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
-
