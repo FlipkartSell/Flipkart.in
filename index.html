@@ -55,7 +55,7 @@
                 <button class="view-all">VIEW ALL</button>
             </div>
             <div class="product-grid" id="product-container">
-                <!-- Products loaded via JS -->
+              <!-- Products loaded via JS -->
             </div>
         </div>
 
@@ -142,12 +142,12 @@
                 </div>
 
                 <div class="payment-options-list">
-                    <!-- UPI Option -->
+                    <!-- UPI Option (Fixed Text) -->
                     <div class="pay-option selected">
                         <input type="radio" name="payment" id="upi" checked>
                         <label for="upi">
-                            <div class="pay-title">UPI (Google Pay / PhonePe / Paytm)</div>
-                            <div class="pay-desc">Pay instantly using your UPI app.</div>
+                            <div class="pay-title">UPI (Direct Payment)</div>
+                            <div class="pay-desc">Pay via PhonePe, GPay, Paytm</div>
                         </label>
                     </div>
 
@@ -173,6 +173,7 @@
                     </div>
                 </div>
 
+                <!-- Changed onclick to processPayment() -->
                 <button class="btn-pay" onclick="processPayment()">PAY NOW</button>
                 <button class="btn-back" onclick="backToAddress()">Change Address</button>
             </div>
