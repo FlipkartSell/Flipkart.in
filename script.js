@@ -321,6 +321,7 @@ const products = [
         image: "https://rukminim2.flixcart.com/image/416/416/xif0q/shopsy-trimmer/a/2/k/trimmer-1-20-mm-stainless-steel-power-play-nxt-beard-trimmer-i-original-imahazyzffanxhrw.jpeg?q=70&crop=false" 
     }
 ];
+
 // --- GLOBAL VARIABLES ---
 let currentProduct = null;
 let currentPrice = 0;
@@ -369,7 +370,7 @@ function filterByCategory(category) {
     }
 }
 
-// 3. Render Grid (With Ratings)
+// 3. Render Grid
 function renderProducts(productList = products) {
     const container = document.getElementById('product-container');
     if (!container) return;
@@ -394,12 +395,10 @@ function renderProducts(productList = products) {
             <div class="discount-badge">95% OFF</div>
             <img src="${product.image}" class="product-img" loading="lazy">
             <div class="product-title">${product.name}</div>
-            
             <div class="product-rating-row">
                 <div class="rating-badge">${product.rating} <i class="fas fa-star"></i></div>
                 <span class="review-count">(${product.reviews})</span>
             </div>
-
             <div class="price-box">
                 <span class="new-price">₹${discPrice}</span>
                 <span class="old-price">₹${product.price}</span>
@@ -411,7 +410,7 @@ function renderProducts(productList = products) {
     });
 }
 
-// 4. Show Detail Page (UPDATED WITH HISTORY PUSH)
+// 4. Show Detail Page
 function showProductDetail(product) {
     history.pushState({view: 'product'}, '', '#product'); 
 
@@ -573,7 +572,6 @@ function goHome() {
     if(homeView) homeView.style.display = 'block';
     if(timerSection) timerSection.style.display = 'block';
 
-    // Close modals
     closeModal();
     document.getElementById('successModal').style.display = 'none';
 
@@ -637,38 +635,55 @@ function backToAddress() {
     document.getElementById('step-address').classList.remove('hidden');
 }
 
-// --- RAZORPAY INTEGRATION ---
-function processRazorpayPayment() {
-    // Check if Razorpay SDK is loaded
+// --- HELPER TO LOAD SCRIPT DYNAMICALLY ---
+function loadRazorpayScript(src) {
+    return new Promise((resolve) => {
+        const script = document.createElement("script");
+        script.src = src;
+        script.onload = () => resolve(true);
+        script.onerror = () => resolve(false);
+        document.body.appendChild(script);
+    });
+}
+
+// --- UPDATED RAZORPAY PAYMENT ---
+async function processRazorpayPayment() {
+    // 1. Check if script is loaded, if not load it
     if (typeof Razorpay === 'undefined') {
-        alert("Razorpay SDK failed to load. Please check your internet connection.");
-        return;
+        // Show loading or just wait
+        const res = await loadRazorpayScript("https://checkout.razorpay.com/v1/checkout.js");
+        if (!res) {
+            alert("Payment Gateway failed to load. Please check internet.");
+            return;
+        }
     }
 
+    // 2. Setup Options
     var options = {
         "key": RAZORPAY_KEY_ID, 
-        "amount": Math.round(currentPrice * 100), // Ensure integer amount (paise)
+        "amount": Math.round(currentPrice * 100), // Ensure integer paise
         "currency": "INR",
-        "name": "FlipKart",
+        "name": "FlipStore",
         "description": isCartOrder ? "Bulk Order" : currentProduct.name,
         "image": "https://rukminim1.flixcart.com/www/800/800/promos/16/05/2019/d438a32e-765a-4d8b-b4a6-520b560971e8.png?q=90",
         "handler": function (response) {
             completeOrder(response.razorpay_payment_id);
         },
         "prefill": {
-            "name": window.userDetails.name || "Customer",
-            "contact": window.userDetails.phone || "9999999999"
+            "name": window.userDetails.name || "",
+            "contact": window.userDetails.phone || ""
         },
         "theme": {
             "color": "#2874f0"
         },
         "modal": {
-            "ondismiss": function(){
+            "ondismiss": function() {
                 console.log('Checkout form closed');
             }
         }
     };
 
+    // 3. Open Razorpay
     try {
         var rzp1 = new Razorpay(options);
         rzp1.on('payment.failed', function (response){
@@ -678,8 +693,8 @@ function processRazorpayPayment() {
         closeModal();
         rzp1.open();
     } catch (e) {
-        console.error("Razorpay Error:", e);
-        alert("Something went wrong with Payment Gateway.");
+        console.error("Razorpay Init Error:", e);
+        alert("Something went wrong. Please try again.");
     }
 }
 
@@ -757,18 +772,14 @@ function startTimer() {
 
 // INITIALIZE
 document.addEventListener('DOMContentLoaded', () => {
-    // --- MOBILE BACK BUTTON LISTENER ---
     window.addEventListener('popstate', function(event) {
-        // When back button is pressed, goHome() restores the home view
         goHome();
     });
-    // -----------------------------------
 
     renderCategories();
     renderProducts();
     startTimer();
 
-    // View All Button
     const viewAllBtn = document.querySelector('.view-all');
     if(viewAllBtn) {
         viewAllBtn.addEventListener('click', () => {
@@ -785,7 +796,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const sellerBtn = Array.from(document.querySelectorAll('.nav-links a')).find(el => el.innerText.includes('Become a Seller'));
     if(sellerBtn) sellerBtn.addEventListener('click', (e) => { e.preventDefault(); alert("Aap eligible nahi hai"); });
 
-    // Search
     const searchInput = document.querySelector('.search-bar input');
     if(searchInput) {
         searchInput.addEventListener('input', (e) => {
