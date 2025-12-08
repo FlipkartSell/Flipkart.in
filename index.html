@@ -55,7 +55,7 @@
                 <button class="view-all">VIEW ALL</button>
             </div>
             <div class="product-grid" id="product-container">
-               <!-- Products loaded via JS -->
+                <!-- Products loaded via JS -->
             </div>
         </div>
 
@@ -142,13 +142,25 @@
                 </div>
 
                 <div class="payment-options-list">
-                    <!-- Razorpay Option -->
+                    <!-- UPI Option -->
                     <div class="pay-option selected">
-                        <input type="radio" name="payment" id="razorpay" checked>
-                        <label for="razorpay">
-                            <div class="pay-title">Pay Online (Razorpay)</div>
-                            <div class="pay-desc">UPI, Cards, Net Banking, Wallet</div>
+                        <input type="radio" name="payment" id="upi" checked>
+                        <label for="upi">
+                            <div class="pay-title">UPI (Google Pay / PhonePe / Paytm)</div>
+                            <div class="pay-desc">Pay instantly using your UPI app.</div>
                         </label>
+                    </div>
+
+                    <!-- Cards (Disabled) -->
+                    <div class="pay-option disabled">
+                        <input type="radio" name="payment" disabled>
+                        <label>Credit / Debit / ATM Card <span class="unavailable">(Unavailable)</span></label>
+                    </div>
+
+                    <!-- Net Banking (Disabled) -->
+                    <div class="pay-option disabled">
+                        <input type="radio" name="payment" disabled>
+                        <label>Net Banking <span class="unavailable">(Unavailable)</span></label>
                     </div>
 
                     <!-- COD (Disabled) -->
@@ -161,7 +173,7 @@
                     </div>
                 </div>
 
-                <button class="btn-pay" onclick="processRazorpayPayment()">PAY NOW</button>
+                <button class="btn-pay" onclick="processPayment()">PAY NOW</button>
                 <button class="btn-back" onclick="backToAddress()">Change Address</button>
             </div>
         </div>
@@ -174,8 +186,6 @@
         </div>
     </div>
 
-    <!-- RAZORPAY SDK ADDED HERE -->
-    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
