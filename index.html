@@ -68,35 +68,54 @@
                 <h3 id="section-title">Deals of the Day</h3>
                 <button class="view-all">VIEW ALL</button>
             </div>
-           <!-- Products loaded via JS -->
+            <!-- Products loaded via JS -->
             </div>
         </div>
 
-        <!-- 2. Product Detail View -->
+        <!-- 2. Product Detail View (Hidden by default) -->
         <div id="product-detail-view" class="hidden">
             <button class="back-btn" onclick="history.back()"><i class="fas fa-arrow-left"></i> Back</button>
+            
             <div class="detail-container">
+                <!-- Left: Image & Buttons -->
                 <div class="detail-left">
-                    <div class="img-box"><img id="detail-img" src="" alt="Product"></div>
+                    <div class="img-box">
+                        <img id="detail-img" src="" alt="Product">
+                    </div>
                     <div class="action-buttons">
                         <button class="btn-cart"><i class="fas fa-shopping-cart"></i> ADD TO CART</button>
                         <button class="btn-buy" onclick="startCheckout()"><i class="fas fa-bolt"></i> BUY NOW</button>
                     </div>
                 </div>
+
+                <!-- Right: Details -->
                 <div class="detail-right">
                     <p class="breadcrumb">Home > Products > Details</p>
                     <h2 id="detail-title">Product Name</h2>
+                    
                     <div class="rating-box">
                         <span class="badge-star">4.5 <i class="fas fa-star"></i></span>
-                        <span class="review-count">Ratings & Reviews</span>
+                        <span class="review-count">1,245 Ratings & 150 Reviews</span>
                     </div>
+
                     <div class="price-row">
                         <span class="final-price" id="detail-price">₹499</span>
                         <span class="original-price" id="detail-old-price">₹1999</span>
                         <span class="discount-label">95% off</span>
                     </div>
+
+                    <div class="offers">
+                        <p><strong>Available offers</strong></p>
+                        <ul>
+                            <li><i class="fas fa-tag"></i> <b>Bank Offer</b> 5% Cashback on Axis Bank Card</li>
+                            <li><i class="fas fa-tag"></i> <b>Special Price</b> Get extra 95% off</li>
+                            <li><i class="fas fa-tag"></i> <b>Partner Offer</b> Sign up for Pay Later</li>
+                        </ul>
+                    </div>
+
                     <div class="specs">
                         <div class="row"><span class="label">Warranty</span> <span class="val">1 Year Warranty</span></div>
+                        <div class="row"><span class="label">Highlights</span> <span class="val">Original Quality, Fast Delivery</span></div>
                         <div class="row"><span class="label">Seller</span> <span class="val">VR Shop</span></div>
                     </div>
                 </div>
@@ -108,8 +127,12 @@
     <div id="checkoutModal" class="modal">
         <div class="modal-content">
             <span class="close-btn" onclick="closeModal()">&times;</span>
+            
+            <!-- Step 1: Address -->
             <div id="step-address">
-                <div class="checkout-header"><span class="step-number">1</span> Delivery Address</div>
+                <div class="checkout-header">
+                    <span class="step-number">1</span> Delivery Address
+                </div>
                 <div class="address-form">
                     <input type="text" id="input-name" placeholder="Full Name (Required)*" required>
                     <input type="tel" id="input-phone" placeholder="Mobile Number (Required)*" required>
@@ -117,48 +140,75 @@
                         <input type="text" id="input-pincode" placeholder="Pincode" required>
                         <input type="text" id="input-city" placeholder="City/State" required>
                     </div>
-                    <textarea id="input-addr" placeholder="Address (Area and Street)*"></textarea>
+                    <textarea id="input-addr" placeholder="House No., Building Name, Road, Area (Required)*"></textarea>
                     <button class="btn-continue" onclick="goToPayment()">DELIVER HERE</button>
                 </div>
             </div>
+
+            <!-- Step 2: Payment -->
             <div id="step-payment" class="hidden">
-                <div class="checkout-header"><span class="step-number">2</span> Payment Options</div>
-                <div class="payment-summary"><span>Total:</span> <span id="payment-total" class="total-text">₹0</span></div>
+                <div class="checkout-header">
+                    <span class="step-number">2</span> Payment Options
+                </div>
+                
+                <div class="payment-summary">
+                    <span>Total Amount to Pay:</span>
+                    <span id="payment-total" class="total-text">₹0</span>
+                </div>
+
                 <div class="payment-options-list">
-                    <div class="pay-option selected">
+                    <div class="pay-option selected" id="online-pay-option">
                         <input type="radio" name="payment" id="online" checked>
-                        <label for="online"><div class="pay-title">Pay Online (Razorpay)</div><div class="pay-desc">UPI, Cards, Wallet</div></label>
+                        <label for="online">
+                            <div class="pay-title">Pay Online (Razorpay)</div>
+                            <div class="pay-desc">UPI, Cards, Wallets, Net Banking</div>
+                        </label>
                     </div>
-                    <div class="pay-option">
+
+                    <div class="pay-option" id="manual-upi-option">
                         <input type="radio" name="payment" id="manual_upi">
-                        <label for="manual_upi"><div class="pay-title">Direct UPI Transfer</div><div class="pay-desc">Pay via App & Enter UTR</div></label>
+                        <label for="manual_upi">
+                            <div class="pay-title">Manual UPI Transfer</div>
+                            <div class="pay-desc">Pay via App & Enter UTR</div>
+                        </label>
+                    </div>
+
+                    <div class="pay-option disabled">
+                        <input type="radio" name="payment" disabled>
+                        <label>Cash on Delivery <span class="error-msg">(Unavailable)</span></label>
                     </div>
                 </div>
+
                 <button class="btn-pay" onclick="initiatePayment()">PAY NOW</button>
                 <button class="btn-back" onclick="backToAddress()">Change Address</button>
             </div>
         </div>
     </div>
 
-    <!-- UTR Modal -->
+    <!-- UTR Modal (Fallback) -->
     <div id="utrModal" class="modal">
         <div class="modal-content utr-content">
             <span class="close-btn" onclick="document.getElementById('utrModal').style.display='none'">&times;</span>
             <div style="text-align: center; padding: 10px;">
                 <h3 style="color: #2874f0;">Manual Verification</h3>
-                <p style="font-size: 13px; color: #555;">Pay to <b>VR Shop</b> & Enter UTR</p>
-                <input type="text" id="utr-input" placeholder="Enter 12-digit UTR" maxlength="12">
+                <p style="font-size: 13px; color: #555; margin: 10px 0;">
+                    Complete payment to <b><span id="merchant-display"></span></b> and enter the 12-digit UTR below.
+                </p>
+                <input type="text" id="utr-input" placeholder="Enter 12-digit UTR/Ref No." maxlength="12">
                 <button class="btn-continue" onclick="verifyUTR()">VERIFY ORDER</button>
             </div>
         </div>
     </div>
 
     <!-- Success Modal -->
-    <div id="successModal" class="modal"><div class="modal-content success-content"></div></div>
+    <div id="successModal" class="modal">
+        <div class="modal-content success-content">
+            <!-- Content Injected via JS -->
+        </div>
+    </div>
 
-    <!-- SCRIPTS (Fixed Paths) -->
+    <!-- RAZORPAY SDK -->
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-    <!-- 'script.js' must be in the same folder as index.html -->
     <script src="script.js"></script>
 </body>
 </html>
