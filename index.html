@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlipKart</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+ <!-- Toast Notification Container -->
+    <div id="toast-box"></div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="hidden">
+        <div class="spinner"></div>
+        <p>Processing Payment...</p>
+    </div>
+    <!-- Header Section -->
+    <header>
+        <div class="navbar">
+            <div class="logo" onclick="goHome()">
+                <h2>FlipKart</h2>
+                <p>Explore <span class="plus">Plus+</span></p>
+            </div>
+            <div class="search-bar">
+                <input type="text" placeholder="Search for products, brands and more">
+                <button><i class="fas fa-search"></i></button>
+            </div>
+            <div class="nav-links">
+                <button class="login-btn">Login</button>
+                <a href="#">Become a Seller</a>
+                <a href="#" class="cart-btn"><i class="fas fa-shopping-cart"></i> Cart</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Timer Section -->
+    <div class="timer-container" id="timer-section">
+        <div class="timer-box">
+            <span class="flash-sale">⚡ FLASH SALE</span>
+            <span class="timer-text">Ends in: <span id="timer">08:00</span></span>
+        </div>
+    </div>
+
+    <main>
+        <!-- 1. Product Grid View (Home) -->
+        <div id="home-view">
+            
+            <!-- NEW: Category Navigation Bar -->
+            <div id="category-nav">
+                <!-- Categories JavaScript se aayenge -->
+            </div>
+
+            <!-- Banner Section -->
+            <div class="banner-container">
+                <img src="https://cdn.gyftr.com/blog/wp-content/uploads/2025/09/09124913/Blog-1.png" alt="Big Billion Days Sale" class="banner-img">
+            </div>
+
+            <div class="deals-header">
+                <h3 id="section-title">Deals of the Day</h3>
+                <button class="view-all">VIEW ALL</button>
+            </div>
+            <div class="product-grid" id="product-container">
+            <!-- Products loaded via JS -->
+            </div>
+        </div>
+
+        <!-- 2. Product Detail View (Hidden by default) -->
+        <div id="product-detail-view" class="hidden">
+            <button class="back-btn" onclick="history.back()"><i class="fas fa-arrow-left"></i> Back</button>
+            
+            <div class="detail-container">
+                <!-- Left: Image & Buttons -->
+                <div class="detail-left">
+                    <div class="img-box">
+                        <img id="detail-img" src="" alt="Product">
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn-cart"><i class="fas fa-shopping-cart"></i> ADD TO CART</button>
+                        <button class="btn-buy" onclick="startCheckout()"><i class="fas fa-bolt"></i> BUY NOW</button>
+                    </div>
+                </div>
+
+                <!-- Right: Details -->
+                <div class="detail-right">
+                    <p class="breadcrumb">Home > Products > Details</p>
+                    <h2 id="detail-title">Product Name</h2>
+                    
+                    <div class="rating-box">
+                        <span class="badge-star">4.5 <i class="fas fa-star"></i></span>
+                        <span class="review-count">1,245 Ratings & 150 Reviews</span>
+                    </div>
+
+                    <div class="price-row">
+                        <span class="final-price" id="detail-price">₹499</span>
+                        <span class="original-price" id="detail-old-price">₹1999</span>
+                        <span class="discount-label">95% off</span>
+                    </div>
+
+                    <div class="offers">
+                        <p><strong>Available offers</strong></p>
+                        <ul>
+                            <li><i class="fas fa-tag"></i> <b>Bank Offer</b> 5% Cashback on Axis Bank Card</li>
+                            <li><i class="fas fa-tag"></i> <b>Special Price</b> Get extra 95% off</li>
+                            <li><i class="fas fa-tag"></i> <b>Partner Offer</b> Sign up for Pay Later</li>
+                        </ul>
+                    </div>
+
+                    <div class="specs">
+                        <div class="row"><span class="label">Warranty</span> <span class="val">1 Year Warranty</span></div>
+                        <div class="row"><span class="label">Highlights</span> <span class="val">Original Quality, Fast Delivery</span></div>
+                        <div class="row"><span class="label">Seller</span> <span class="val">SuperComNet</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Checkout Modal -->
+    <div id="checkoutModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+            
+            <!-- Step 1: Address -->
+            <div id="step-address">
+                <div class="checkout-header">
+                    <span class="step-number">1</span> Delivery Address
+                </div>
+                <div class="address-form">
+                    <input type="text" id="input-name" placeholder="Full Name (Required)*" required>
+                    <input type="tel" id="input-phone" placeholder="Mobile Number (Required)*" required>
+                    <div class="row-inputs">
+                        <input type="text" id="input-pincode" placeholder="Pincode" required>
+                        <input type="text" id="input-city" placeholder="City/State" required>
+                    </div>
+                    <textarea id="input-addr" placeholder="House No., Building Name, Road, Area (Required)*"></textarea>
+                    <button class="btn-continue" onclick="goToPayment()">DELIVER HERE</button>
+                </div>
+            </div>
+
+            <!-- Step 2: Payment -->
+            <div id="step-payment" class="hidden">
+                <div class="checkout-header">
+                    <span class="step-number">2</span> Payment Options
+                </div>
+                
+                <div class="payment-summary">
+                    <span>Total Amount to Pay:</span>
+                    <span id="payment-total" class="total-text">₹0</span>
+                </div>
+
+                <div class="payment-options-list">
+                    <div class="pay-option selected" id="online-pay-option">
+                        <input type="radio" name="payment" id="online" checked>
+                        <label for="online">
+                            <div class="pay-title">Pay Online (Recommended)</div>
+                            <div class="pay-desc">UPI, Cards, Wallets, Net Banking</div>
+                        </label>
+                    </div>
+
+                    <div class="pay-option" id="manual-upi-option">
+                        <input type="radio" name="payment" id="manual_upi">
+                        <label for="manual_upi">
+                            <div class="pay-title">Manual UPI Transfer</div>
+                            <div class="pay-desc">Pay via App & Enter UTR</div>
+                        </label>
+                    </div>
+
+                    <div class="pay-option disabled">
+                        <input type="radio" name="payment" disabled>
+                        <label>Cash on Delivery <span class="error-msg">(Unavailable)</span></label>
+                    </div>
+                </div>
+
+                <button class="btn-pay" onclick="initiatePayment()">PAY NOW</button>
+                <button class="btn-back" onclick="backToAddress()">Change Address</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- UTR Modal (Fallback) -->
+    <div id="utrModal" class="modal">
+        <div class="modal-content utr-content">
+            <span class="close-btn" onclick="document.getElementById('utrModal').style.display='none'">&times;</span>
+            <div style="text-align: center; padding: 10px;">
+                <h3 style="color: #2874f0;">Manual Verification</h3>
+                <p style="font-size: 13px; color: #555; margin: 10px 0;">
+                    Complete payment to <b><span id="merchant-display"></span></b> and enter the 12-digit UTR below.
+                </p>
+                <input type="text" id="utr-input" placeholder="Enter 12-digit UTR/Ref No." maxlength="12">
+                <button class="btn-continue" onclick="verifyUTR()">VERIFY ORDER</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="successModal" class="modal">
+        <div class="modal-content success-content">
+            <!-- Content Injected via JS -->
+        </div>
+    </div>
+
+    <!-- RAZORPAY SDK -->
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
