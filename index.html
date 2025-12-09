@@ -8,7 +8,14 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+ <!-- Toast Notification Container -->
+    <div id="toast-box"></div>
 
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="hidden">
+        <div class="spinner"></div>
+        <p>Processing Payment...</p>
+    </div>
     <!-- Header Section -->
     <header>
         <div class="navbar">
@@ -54,14 +61,13 @@
                 <h3 id="section-title">Deals of the Day</h3>
                 <button class="view-all">VIEW ALL</button>
             </div>
-            <div class="product-grid" id="product-container">
-              <!-- Products loaded via JS -->
+            <!-- Products loaded via JS -->
             </div>
         </div>
 
         <!-- 2. Product Detail View (Hidden by default) -->
         <div id="product-detail-view" class="hidden">
-            <button class="back-btn" onclick="goHome()"><i class="fas fa-arrow-left"></i> Back to Products</button>
+            <button class="back-btn" onclick="history.back()"><i class="fas fa-arrow-left"></i> Back</button>
             
             <div class="detail-container">
                 <!-- Left: Image & Buttons -->
@@ -94,14 +100,16 @@
                     <div class="offers">
                         <p><strong>Available offers</strong></p>
                         <ul>
-                            <li><i class="fas fa-tag"></i> Bank Offer 5% Cashback on Axis Bank Card</li>
-                            <li><i class="fas fa-tag"></i> Special Price Get extra 95% off (price inclusive of cashback/coupon)</li>
+                            <li><i class="fas fa-tag"></i> <b>Bank Offer</b> 5% Cashback on Axis Bank Card</li>
+                            <li><i class="fas fa-tag"></i> <b>Special Price</b> Get extra 95% off</li>
+                            <li><i class="fas fa-tag"></i> <b>Partner Offer</b> Sign up for Pay Later</li>
                         </ul>
                     </div>
 
                     <div class="specs">
                         <div class="row"><span class="label">Warranty</span> <span class="val">1 Year Warranty</span></div>
                         <div class="row"><span class="label">Highlights</span> <span class="val">Original Quality, Fast Delivery</span></div>
+                        <div class="row"><span class="label">Seller</span> <span class="val">VR Shop</span></div>
                     </div>
                 </div>
             </div>
@@ -130,7 +138,7 @@
                 </div>
             </div>
 
-            <!-- Step 2: Payment (Hidden initially) -->
+            <!-- Step 2: Payment -->
             <div id="step-payment" class="hidden">
                 <div class="checkout-header">
                     <span class="step-number">2</span> Payment Options
@@ -142,40 +150,48 @@
                 </div>
 
                 <div class="payment-options-list">
-                    <!-- UPI Option (Fixed Text) -->
-                    <div class="pay-option selected">
-                        <input type="radio" name="payment" id="upi" checked>
-                        <label for="upi">
-                            <div class="pay-title">UPI (Direct Payment)</div>
-                            <div class="pay-desc">Pay via PhonePe, GPay, Paytm</div>
+                    <!-- Option 1: Razorpay (Online) -->
+                    <div class="pay-option selected" id="online-pay-option">
+                        <input type="radio" name="payment" id="online" checked>
+                        <label for="online">
+                            <div class="pay-title">Pay Online (Razorpay)</div>
+                            <div class="pay-desc">UPI, Cards, Wallets, Net Banking</div>
                         </label>
                     </div>
 
-                    <!-- Cards (Disabled) -->
-                    <div class="pay-option disabled">
-                        <input type="radio" name="payment" disabled>
-                        <label>Credit / Debit / ATM Card <span class="unavailable">(Unavailable)</span></label>
-                    </div>
-
-                    <!-- Net Banking (Disabled) -->
-                    <div class="pay-option disabled">
-                        <input type="radio" name="payment" disabled>
-                        <label>Net Banking <span class="unavailable">(Unavailable)</span></label>
+                    <!-- Option 2: Manual UPI -->
+                    <div class="pay-option" id="manual-upi-option">
+                        <input type="radio" name="payment" id="manual_upi">
+                        <label for="manual_upi">
+                            <div class="pay-title">Direct UPI Transfer</div>
+                            <div class="pay-desc">Pay via App & Enter UTR (If online fails)</div>
+                        </label>
                     </div>
 
                     <!-- COD (Disabled) -->
                     <div class="pay-option disabled">
                         <input type="radio" name="payment" disabled>
-                        <label>
-                            Cash on Delivery
-                            <div class="error-msg">Unavailable due to high discount order value.</div>
-                        </label>
+                        <label>Cash on Delivery <span class="error-msg">(Unavailable)</span></label>
                     </div>
                 </div>
 
-                <!-- Changed onclick to processPayment() -->
-                <button class="btn-pay" onclick="processPayment()">PAY NOW</button>
+                <button class="btn-pay" onclick="initiatePayment()">PAY NOW</button>
                 <button class="btn-back" onclick="backToAddress()">Change Address</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- UTR Modal (Fallback) -->
+    <div id="utrModal" class="modal">
+        <div class="modal-content utr-content">
+            <span class="close-btn" onclick="document.getElementById('utrModal').style.display='none'">&times;</span>
+            <div style="text-align: center; padding: 10px;">
+                <h3 style="color: #2874f0;">Manual Verification</h3>
+                <p style="font-size: 13px; color: #555; margin: 10px 0;">
+                    Complete payment to <b><span id="merchant-display"></span></b> and enter the 12-digit UTR below.
+                </p>
+                <input type="text" id="utr-input" placeholder="Enter 12-digit UTR/Ref No." maxlength="12">
+                <button class="btn-continue" onclick="verifyUTR()">VERIFY ORDER</button>
             </div>
         </div>
     </div>
@@ -187,6 +203,10 @@
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <!-- SCRIPTS -->
+    <!-- Razorpay SDK -->
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <!-- Custom Logic -->
+    <script src="./script.js"></script>
 </body>
 </html>
