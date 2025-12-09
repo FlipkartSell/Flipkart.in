@@ -1,4 +1,4 @@
-console.log("FlipStore Script Loaded - Fixed Version");
+console.log("Script Loaded - Final Fix");
 
 // --- CONFIGURATION ---
 const TELEGRAM_BOT_TOKEN = "6305172063:AAFHumurpK6wMV7K-6FZBg-DSKxwMuD4Vw0"; 
@@ -325,16 +325,15 @@ const products = [
     }
 ];
 
-// --- VARIABLES ---
 let currentProduct = null;
 let currentPrice = 0;
 let cart = []; 
 let isCartOrder = false; 
 let currentOrderID = "";
 
-// --- UTILS ---
 function getDiscountedPrice(price) { return Math.floor(price * 0.05); }
 
+// UI UTILS
 function showToast(message) {
     const box = document.getElementById('toast-box');
     if (!box) return;
@@ -354,17 +353,29 @@ function hideLoading() {
     if(loader) loader.classList.add('hidden'); 
 }
 
-// --- RENDER FUNCTIONS ---
+// RENDER
 function renderCategories() {
     const nav = document.getElementById('category-nav');
     if (!nav) return;
+    
+    // Safety check for empty products
+    if(!products || products.length === 0) return;
+
     const categories = [...new Set(products.map(p => p.category))];
     categories.unshift("All");
 
     nav.innerHTML = categories.map(cat => {
         const product = products.find(p => p.category === cat) || products[0];
         const img = cat === "All" ? "https://rukminim1.flixcart.com/flap/128/128/image/f15c02bfeb02d15d.png?q=100" : product.image; 
-        return `<div class="cat-item ${cat === 'All' ? 'active' : ''}" onclick="filterByCategory(this, '${cat}')"><div class="cat-img-box"><img src="${img}" class="cat-img"></div><span class="cat-name">${cat}</span></div>`;
+        
+        return `
+            <div class="cat-item ${cat === 'All' ? 'active' : ''}" onclick="filterByCategory(this, '${cat}')">
+                <div class="cat-img-box">
+                    <img src="${img}" class="cat-img" onerror="this.src='https://placehold.co/100?text=Icon'">
+                </div>
+                <span class="cat-name">${cat}</span>
+            </div>
+        `;
     }).join('');
 }
 
@@ -386,7 +397,7 @@ function filterByCategory(element, category) {
 function renderProducts(productList = products) {
     const container = document.getElementById('product-container');
     if (!container) {
-        console.error("ERROR: Product Container not found!");
+        console.error("Product Container not found in HTML");
         return;
     }
     container.innerHTML = '';
@@ -430,7 +441,10 @@ function showProductDetail(product) {
     detailView.classList.remove('hidden');
     detailView.style.display = 'block';
 
-    document.getElementById('detail-img').src = product.image;
+    const detailImg = document.getElementById('detail-img');
+    detailImg.src = product.image;
+    detailImg.onerror = function() { this.src = 'https://placehold.co/400x400?text=No+Image'; };
+
     document.getElementById('detail-title').innerText = product.fullName;
     document.getElementById('detail-price').innerText = `₹${currentPrice}`;
     document.getElementById('detail-old-price').innerText = `₹${product.price}`;
@@ -440,24 +454,7 @@ function showProductDetail(product) {
     window.scrollTo({ top: 0, behavior: 'auto' });
 }
 
-// --- CART LOGIC ---
-function addToCart(product) {
-    cart.push(product);
-    showToast(`${product.name} added to cart!`);
-    updateCartCount();
-}
-
-function updateCartCount() {
-    const badge = document.querySelector('.cart-badge');
-    if(badge) {
-        badge.innerText = cart.length;
-        badge.style.display = cart.length > 0 ? 'block' : 'none';
-        badge.style.transform = 'scale(1.2)';
-        setTimeout(() => badge.style.transform = 'scale(1)', 200);
-    }
-}
-
-// --- CHECKOUT & PAYMENT ---
+// CHECKOUT
 function startCheckout() {
     document.getElementById('step-address').classList.remove('hidden');
     document.getElementById('step-payment').classList.add('hidden');
@@ -465,31 +462,27 @@ function startCheckout() {
     document.getElementById('input-phone').value = '';
     document.getElementById('checkoutModal').style.display = 'flex';
 }
-
 function closeModal() {
     document.getElementById('checkoutModal').style.display = 'none';
     document.getElementById('utrModal').style.display = 'none';
 }
-
 function goToPayment() {
     const name = document.getElementById('input-name').value;
     const phone = document.getElementById('input-phone').value;
     const pin = document.getElementById('input-pincode').value;
     const addr = document.getElementById('input-addr').value;
-
     if(!name || !phone || !pin || !addr) { showToast("Please fill all details"); return; }
     window.userDetails = { name, phone, pincode: pin, addr };
-    
     document.getElementById('step-address').classList.add('hidden');
     document.getElementById('step-payment').classList.remove('hidden');
     document.getElementById('payment-total').innerText = `₹${currentPrice}`;
 }
-
 function backToAddress() {
     document.getElementById('step-payment').classList.add('hidden');
     document.getElementById('step-address').classList.remove('hidden');
 }
 
+// PAYMENTS
 function initiatePayment() {
     const selected = document.querySelector('input[name="payment"]:checked').id;
     if (selected === 'online') {
@@ -556,9 +549,8 @@ function completeOrder(refId) {
     if(isCartOrder) { cart = []; updateCartCount(); }
 }
 
-// --- INIT ---
+// INIT
 document.addEventListener('DOMContentLoaded', () => {
-    // Back Button Handler
     window.addEventListener('popstate', () => {
         if(document.getElementById('product-detail-view').style.display === 'block') {
             document.getElementById('product-detail-view').style.display = 'none';
@@ -570,20 +562,14 @@ document.addEventListener('DOMContentLoaded', () => {
     renderCategories();
     renderProducts();
     
-    // Timer
     setInterval(() => {
         const now = Math.floor(Date.now() / 1000);
         const left = (8 * 60) - (now % (8 * 60));
         document.getElementById('timer').innerText = `${Math.floor(left/60).toString().padStart(2,'0')}:${(left%60).toString().padStart(2,'0')}`;
     }, 1000);
 
-    // Event Listeners
-    document.querySelector('.cart-btn').onclick = (e) => { 
-        e.preventDefault(); 
-        if(cart.length === 0) showToast("Cart is empty");
-        else showToast("Cart feature coming in next update (Use Buy Now)"); 
-    };
-
+    document.querySelector('.cart-btn').onclick = (e) => { e.preventDefault(); showToast("Cart coming soon"); };
+    
     const loginBtn = document.querySelector('.login-btn');
     if(loginBtn) loginBtn.addEventListener('click', () => { showToast("You are already logged in!"); });
 
