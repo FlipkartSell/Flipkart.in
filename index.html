@@ -3,9 +3,271 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FlipKart</title>
+    <title>FlipKart Clone</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Base */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Roboto', Arial, sans-serif; }
+        body { background-color: #f1f3f6; color: #212121; -webkit-tap-highlight-color: transparent; padding-bottom: 60px; /* Space for mobile nav */ }
+
+        .hidden { display: none !important; }
+
+        /* Toast Notifications */
+        #toast-box {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 90%;
+            max-width: 350px;
+        }
+
+        .toast {
+            background: #333;
+            color: white;
+            padding: 12px 16px;
+            border-radius: 4px;
+            font-size: 14px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            animation: slideUp 0.3s ease-out;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        /* Loading Overlay */
+        #loading-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            z-index: 11000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #2874f0;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 10px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Header */
+        header { background-color: #2874f0; padding: 10px 0; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 4px rgba(0,0,0,.2); }
+        .navbar { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; }
+        .logo { cursor: pointer; color: white; }
+        .logo h2 { font-style: italic; font-weight: bold; margin: 0; font-size: 20px; }
+        .logo p { font-size: 11px; font-style: italic; margin-top: -2px; opacity: 0.9; }
+        .plus { color: #ffe500; font-weight: bold; }
+
+        .search-bar { flex: 1; margin: 0 20px; display: flex; background: white; border-radius: 2px; padding: 5px; box-shadow: 0 1px 2px rgba(0,0,0,.2); }
+        .search-bar input { width: 100%; border: none; outline: none; padding: 5px; font-size: 14px; }
+        .search-bar button { background: transparent; border: none; color: #2874f0; cursor: pointer; padding: 0 10px; font-size: 16px; }
+
+        .nav-links { display: flex; align-items: center; gap: 20px; font-weight: 600; }
+        .login-btn { background: white; color: #2874f0; border: 1px solid #dbdbdb; padding: 5px 30px; font-weight: bold; cursor: pointer; border-radius: 2px; transition: 0.2s; }
+        .login-btn:hover { background: #f0f0f0; }
+        .nav-links a { color: white; text-decoration: none; font-size: 15px; display: flex; align-items: center; gap: 5px; cursor: pointer; }
+        .cart-btn { position: relative; }
+        .cart-badge { background: #ff6161; color: white; font-size: 10px; border-radius: 50%; padding: 2px 5px; position: absolute; top: -5px; right: -8px; font-weight: bold; border: 1px solid #2874f0; display: none; }
+
+        /* Timer */
+        .timer-container { background: white; padding: 12px; margin-bottom: 10px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); text-align: center; border-bottom: 1px solid #eaeaea; }
+        .flash-sale { background: #ff0000; color: white; padding: 3px 8px; font-size: 12px; font-weight: bold; border-radius: 3px; margin-right: 10px; vertical-align: middle; animation: pulse 1s infinite alternate; }
+        @keyframes pulse { from { opacity: 0.8; } to { opacity: 1; } }
+        .timer-text { font-size: 16px; color: #666; vertical-align: middle; }
+        #timer { font-weight: bold; color: #333; font-family: monospace; font-size: 18px; }
+
+        /* Category Nav */
+        #category-nav { display: flex; overflow-x: auto; background: white; padding: 15px 5px; margin-bottom: 10px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); scrollbar-width: none; }
+        #category-nav::-webkit-scrollbar { display: none; }
+        .cat-item { min-width: 80px; display: flex; flex-direction: column; align-items: center; cursor: pointer; margin: 0 10px; transition: transform 0.2s; }
+        .cat-item:active { transform: scale(0.95); }
+        .cat-item.active .cat-name { color: #2874f0; font-weight: bold; }
+        .cat-item.active .cat-img-box { border: 2px solid #2874f0; }
+        .cat-img-box { width: 60px; height: 60px; border-radius: 50%; background: #f0f0f0; overflow: hidden; margin-bottom: 8px; display: flex; justify-content: center; align-items: center; }
+        .cat-img { width: 100%; height: 100%; object-fit: cover; }
+        .cat-name { font-size: 12px; font-weight: 500; color: #444; text-align: center; }
+
+        /* Banner */
+        .banner-container { margin-bottom: 10px; width: 100%; overflow: hidden; }
+        .banner-img { width: 100%; height: auto; border-radius: 2px; display: block; }
+
+        /* Main */
+        main { max-width: 1200px; margin: 0 auto; min-height: 80vh; padding: 10px; }
+        #home-view, #product-detail-view { background: white; padding: 10px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); border-radius: 2px; }
+
+        .deals-header { display: flex; justify-content: space-between; border-bottom: 1px solid #f0f0f0; padding-bottom: 15px; margin-bottom: 15px; align-items: center; }
+        .deals-header h3 { font-size: 18px; font-weight: 500; }
+        .view-all { background: #2874f0; color: white; border: none; padding: 8px 16px; font-weight: bold; cursor: pointer; border-radius: 2px; font-size: 12px; }
+
+        /* Grid */
+        .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
+        .product-card { border: 1px solid #f0f0f0; padding: 15px; text-align: center; cursor: pointer; transition: 0.3s; position: relative; background: white; border-radius: 4px; }
+        .product-card:hover { box-shadow: 0 5px 15px rgba(0,0,0,0.1); transform: translateY(-3px); }
+        .discount-badge { position: absolute; top: 10px; left: 10px; background: #388e3c; color: white; font-size: 10px; padding: 2px 6px; border-radius: 2px; font-weight: bold; }
+        .product-img { height: 160px; width: 100%; object-fit: contain; margin-bottom: 10px; }
+        .product-title { font-size: 14px; font-weight: 500; margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #212121; }
+        .product-rating-row { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 8px; }
+        .rating-badge { background: #388e3c; color: white; font-size: 12px; padding: 2px 6px; border-radius: 3px; font-weight: bold; display: flex; align-items: center; gap: 2px; }
+        .rating-badge i { font-size: 10px; }
+        .review-count { color: #878787; font-size: 12px; }
+        
+        /* Assured Badge */
+        .assured-img { height: 18px; width: auto; margin-left: 8px; }
+
+        .price-box { margin-top: 5px; }
+        .new-price { font-size: 16px; font-weight: bold; color: #212121; }
+        .old-price { font-size: 12px; color: #878787; text-decoration: line-through; margin-left: 5px; }
+        .off-percent { font-size: 13px; color: #388e3c; font-weight: bold; margin-left: 5px; }
+
+        /* Detail Page */
+        .detail-container { display: flex; gap: 20px; flex-wrap: wrap; margin-top: 10px; }
+        .detail-left { width: 40%; min-width: 300px; }
+        .img-box { border: 1px solid #f0f0f0; padding: 20px; display: flex; justify-content: center; height: 350px; margin-bottom: 15px; background: white; }
+        .img-box img { max-height: 100%; max-width: 100%; object-fit: contain; }
+        .action-buttons { display: flex; gap: 10px; }
+        .action-buttons button { flex: 1; padding: 16px; color: white; border: none; font-weight: bold; font-size: 16px; cursor: pointer; border-radius: 2px; box-shadow: 0 1px 2px rgba(0,0,0,.2); display: flex; align-items: center; justify-content: center; gap: 5px; transition: 0.2s; }
+        .action-buttons button:active { transform: scale(0.98); }
+        .btn-cart { background: #ff9f00; }
+        .btn-buy { background: #fb641b; }
+
+        .detail-right { flex: 1; }
+        .breadcrumb { font-size: 12px; color: #878787; margin-bottom: 10px; }
+        #detail-title { font-size: 18px; font-weight: 400; margin-bottom: 10px; line-height: 1.4; }
+        .final-price { font-size: 28px; font-weight: bold; color: #212121; }
+        .offers ul { list-style: none; padding: 0; margin-top: 10px; }
+        .offers li { font-size: 13px; margin-bottom: 8px; color: #212121; }
+        .offers i { color: #388e3c; margin-right: 8px; }
+        
+        /* New Specifications Table Styles */
+        .specifications-box { margin-top: 20px; border: 1px solid #f0f0f0; border-radius: 4px; overflow: hidden; }
+        .spec-header { background: #f1f3f6; padding: 10px 15px; font-size: 16px; font-weight: 500; color: #212121; border-bottom: 1px solid #f0f0f0; }
+        .spec-row { display: flex; border-bottom: 1px solid #f0f0f0; padding: 10px 15px; font-size: 14px; }
+        .spec-row:last-child { border-bottom: none; }
+        .spec-key { color: #878787; width: 30%; min-width: 100px; }
+        .spec-val { color: #212121; font-weight: 500; flex: 1; }
+        
+        /* Similar Products Section */
+        .similar-section { margin-top: 30px; border-top: 1px solid #f0f0f0; padding-top: 20px; }
+        .similar-section h3 { font-size: 20px; font-weight: 500; margin-bottom: 15px; color: #212121; }
+
+        /* Checkout Modal */
+        .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); align-items: flex-end; justify-content: center; }
+        .modal-content { background-color: #f1f3f6; width: 100%; max-width: 500px; height: auto; max-height: 90vh; border-radius: 8px 8px 0 0; overflow-y: auto; padding-bottom: 20px; animation: slideUpModal 0.3s ease-out; }
+        @keyframes slideUpModal { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+        @media (min-width: 600px) {
+            .modal { align-items: center; }
+            .modal-content { border-radius: 4px; max-height: 80vh; }
+        }
+
+        .close-btn { position: absolute; right: 15px; top: 12px; font-size: 24px; cursor: pointer; color: white; z-index: 10; }
+        .checkout-header { background: #2874f0; color: white; padding: 15px; font-size: 16px; font-weight: 500; display: flex; align-items: center; gap: 10px; position: sticky; top: 0; z-index: 5; }
+        .address-form { padding: 20px; background: white; display: flex; flex-direction: column; gap: 12px; }
+        .address-form input, .address-form textarea, #utr-input { width: 100%; padding: 14px; border: 1px solid #e0e0e0; outline: none; border-radius: 4px; font-size: 14px; transition: 0.2s; }
+        .address-form input:focus, .address-form textarea:focus, #utr-input:focus { border-color: #2874f0; box-shadow: 0 0 0 2px rgba(40,116,240,0.1); }
+        .btn-continue, .btn-pay { width: 100%; background: #fb641b; color: white; border: none; padding: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; border-radius: 2px; font-size: 15px; }
+
+        .payment-options-list { padding: 10px 0; background: white; }
+        .pay-option { padding: 15px; border-bottom: 1px solid #f0f0f0; display: flex; gap: 15px; align-items: flex-start; background: white; cursor: pointer; }
+        .pay-option.selected { background: #f4f8ff; border-left: 4px solid #2874f0; }
+        .pay-option input { margin-top: 4px; accent-color: #2874f0; }
+        .pay-title { font-weight: 500; font-size: 15px; color: #212121; }
+        .pay-desc { font-size: 12px; color: #666; margin-top: 2px; }
+        .pay-option.disabled { opacity: 0.5; pointer-events: none; }
+        .error-msg { color: #ff6161; font-size: 11px; }
+        
+        /* Cart Specific Styles */
+        .cart-item { display: flex; gap: 10px; background: white; padding: 10px; margin-bottom: 10px; border-bottom: 1px solid #eee; }
+        .cart-item img { width: 60px; height: 60px; object-fit: contain; }
+        .cart-item-details { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+        .cart-item-title { font-size: 14px; font-weight: 500; color: #212121; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 200px; }
+        .cart-item-price { font-size: 15px; font-weight: bold; color: #212121; margin-top: 4px; }
+        .cart-remove-btn { color: #212121; font-weight: 500; font-size: 13px; margin-top: 8px; cursor: pointer; text-transform: uppercase; width: fit-content; }
+        .cart-remove-btn:hover { color: #2874f0; }
+        .cart-footer { padding: 15px; background: white; border-top: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; position: sticky; bottom: 0; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
+        .cart-total-price { font-size: 18px; font-weight: bold; color: #212121; }
+        .empty-cart-msg { text-align: center; padding: 40px 20px; color: #878787; }
+        
+        /* Price Details Section (NEW) */
+        .price-details { background: white; padding: 15px; border-top: 1px solid #f0f0f0; margin-bottom: 10px; }
+        .price-details h4 { color: #878787; font-weight: 500; font-size: 14px; text-transform: uppercase; border-bottom: 1px solid #f0f0f0; padding-bottom: 10px; margin-bottom: 10px; }
+        .price-row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 14px; color: #212121; }
+        .price-row.total { border-top: 1px dashed #e0e0e0; padding-top: 15px; font-weight: bold; font-size: 16px; margin-bottom: 0; }
+        .green-text { color: #388e3c; }
+
+        /* UTR Modal Buttons */
+        .utr-actions { display: flex; gap: 10px; margin-top: 10px; }
+        .btn-outline { background: white; border: 1px solid #2874f0; color: #2874f0; padding: 10px; font-weight: bold; flex: 1; cursor: pointer; border-radius: 2px; }
+        .btn-copy { background: #eee; border: none; padding: 4px 8px; font-size: 12px; cursor: pointer; border-radius: 3px; margin-left: 5px; }
+
+        /* Order Summary Styles */
+        .order-summary-item { display: flex; gap: 12px; padding: 15px; background: white; border-bottom: 1px solid #f0f0f0; }
+        .os-img { width: 70px; height: 70px; object-fit: contain; }
+        .os-details { flex: 1; }
+        .os-title { font-size: 14px; font-weight: 500; color: #212121; margin-bottom: 4px; }
+        .os-price-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+        .os-price { font-size: 16px; font-weight: bold; color: #212121; }
+        .os-old-price { font-size: 12px; text-decoration: line-through; color: #878787; }
+        .os-discount { font-size: 12px; color: #388e3c; font-weight: bold; }
+        .delivery-info { font-size: 12px; color: #212121; margin-top: 8px; }
+        .open-box-tag { background: #fdf5f5; color: #ff6161; border: 1px solid #ff6161; font-size: 10px; padding: 2px 6px; border-radius: 2px; font-weight: bold; margin-left: 8px; }
+
+        /* --- Footer Styles --- */
+        footer { background-color: #172337; color: white; padding: 40px 20px; font-size: 12px; margin-top: 20px; }
+        .footer-content { max-width: 1200px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 40px; }
+        .footer-section { flex: 1; min-width: 150px; }
+        .footer-section h3 { color: #878787; font-size: 12px; text-transform: uppercase; margin-bottom: 15px; font-weight: normal; }
+        .footer-section ul { list-style: none; padding: 0; }
+        .footer-section ul li { margin-bottom: 8px; }
+        .footer-section ul li a { color: white; text-decoration: none; font-weight: 500; }
+        .footer-section ul li a:hover { text-decoration: underline; }
+        
+        .footer-address { flex: 1.5; border-left: 1px solid #454d5e; padding-left: 20px; display: flex; gap: 30px; }
+        .address-box p { line-height: 1.6; margin-bottom: 5px; }
+        .address-title { color: #878787; font-size: 12px; text-transform: uppercase; margin-bottom: 10px; display: block; }
+
+        @media (max-width: 768px) {
+            .footer-content { flex-direction: column; gap: 20px; }
+            .footer-address { border-left: none; padding-left: 0; flex-direction: column; gap: 20px; }
+        }
+
+        /* Mobile CSS */
+        @media (max-width: 600px) {
+            .product-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; }
+            .product-card { padding: 8px !important; }
+            .product-img { height: 110px !important; }
+            .product-title { font-size: 12px !important; }
+            .new-price { font-size: 14px !important; }
+            
+            .navbar { flex-wrap: wrap; justify-content: space-between; padding-bottom: 10px; }
+            .logo { font-size: 16px; flex: 1; }
+            .search-bar { order: 3; flex: 0 0 100%; margin: 10px 0 0 0; }
+            
+            .nav-links { display: flex !important; align-items: center; gap: 15px; }
+            .nav-links > a:not(.cart-btn) { display: none; }
+            .login-btn { padding: 5px 12px; font-size: 12px; }
+            
+            /* Show Mobile Nav */
+            .mobile-nav { display: flex; }
+            
+            .detail-left { width: 100%; }
+            .action-buttons { position: fixed; bottom: 0; left: 0; width: 100%; z-index: 100; margin: 0; gap: 0; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); }
+            .action-buttons button { border-radius: 0; padding: 18px; box-shadow: none; }
+            #product-detail-view { padding-bottom: 120px; }
+        }
+    </style>
 </head>
 <body>
  <!-- Toast Notification Container -->
@@ -19,7 +281,7 @@
     <!-- Header Section -->
     <header>
         <div class="navbar">
-            <div class="logo" onclick="goHome()">
+            <div class="logo" onclick="window.location.reload()">
                 <h2>FlipKart</h2>
                 <p>Explore <span class="plus">Plus+</span></p>
             </div>
@@ -30,7 +292,7 @@
             <div class="nav-links">
                 <button class="login-btn">Login</button>
                 <a href="#">Become a Seller</a>
-                <a href="#" class="cart-btn"><i class="fas fa-shopping-cart"></i> Cart</a>
+                <a href="#" class="cart-btn" onclick="openCart()"><i class="fas fa-shopping-cart"></i> Cart <span class="cart-badge">0</span></a>
             </div>
         </div>
     </header>
@@ -54,7 +316,7 @@
 
             <!-- Banner Section -->
             <div class="banner-container">
-                <img src="https://cdn.gyftr.com/blog/wp-content/uploads/2025/09/09124913/Blog-1.png" alt="Big Billion Days Sale" class="banner-img">
+                <img src="https://cdn.gyftr.com/blog/wp-content/uploads/2025/09/09124913/Blog-1.png" alt="Big Billion Days Sale" class="banner-img" onerror="this.src='https://placehold.co/800x200?text=Big+Billion+Sale'">
             </div>
 
             <div class="deals-header">
@@ -68,7 +330,7 @@
 
         <!-- 2. Product Detail View (Hidden by default) -->
         <div id="product-detail-view" class="hidden">
-            <button class="back-btn" onclick="history.back()"><i class="fas fa-arrow-left"></i> Back</button>
+            <button class="back-btn" onclick="goHome()" style="background:none; border:none; color:#2874f0; font-weight:bold; padding:10px; cursor:pointer;"><i class="fas fa-arrow-left"></i> Back</button>
             
             <div class="detail-container">
                 <!-- Left: Image & Buttons -->
@@ -77,8 +339,8 @@
                         <img id="detail-img" src="" alt="Product">
                     </div>
                     <div class="action-buttons">
-                        <button class="btn-cart"><i class="fas fa-shopping-cart"></i> ADD TO CART</button>
-                        <button class="btn-buy" onclick="startCheckout()"><i class="fas fa-bolt"></i> BUY NOW</button>
+                        <button class="btn-cart" onclick="addToCart(currentProduct)"><i class="fas fa-shopping-cart"></i> ADD TO CART</button>
+                        <button class="btn-buy" onclick="buyNow(currentProduct)"><i class="fas fa-bolt"></i> BUY NOW</button>
                     </div>
                 </div>
 
@@ -88,34 +350,129 @@
                     <h2 id="detail-title">Product Name</h2>
                     
                     <div class="rating-box">
-                        <span class="badge-star">4.5 <i class="fas fa-star"></i></span>
+                        <span class="badge-star" style="background:#388e3c; color:white; padding:2px 6px; border-radius:3px; font-size:12px;">4.5 <i class="fas fa-star"></i></span>
                         <span class="review-count">1,245 Ratings & 150 Reviews</span>
+                        <img src="https://static-assets-web.flixcart.com/fk-p-linchpin-web/fk-cp-zion/img/fa_62673a.png" class="assured-img" alt="Assured">
                     </div>
 
-                    <div class="price-row">
+                    <div class="price-row" style="margin: 10px 0;">
                         <span class="final-price" id="detail-price">₹499</span>
-                        <span class="original-price" id="detail-old-price">₹1999</span>
-                        <span class="discount-label">95% off</span>
+                        <span class="original-price" id="detail-old-price" style="text-decoration:line-through; color:#878787; margin-left:10px;">₹1999</span>
+                        <span class="discount-label" id="detail-discount-label" style="color:#388e3c; font-weight:bold; margin-left:10px;">95% off</span>
                     </div>
 
                     <div class="offers">
                         <p><strong>Available offers</strong></p>
                         <ul>
                             <li><i class="fas fa-tag"></i> <b>Bank Offer</b> 5% Cashback on Axis Bank Card</li>
-                            <li><i class="fas fa-tag"></i> <b>Special Price</b> Get extra 95% off</li>
+                            <li><i class="fas fa-tag"></i> <b>Special Price</b> <span id="offer-discount-text">Get extra discount</span></li>
                             <li><i class="fas fa-tag"></i> <b>Partner Offer</b> Sign up for Pay Later</li>
                         </ul>
                     </div>
 
-                    <div class="specs">
-                        <div class="row"><span class="label">Warranty</span> <span class="val">1 Year Warranty</span></div>
-                        <div class="row"><span class="label">Highlights</span> <span class="val">Original Quality, Fast Delivery</span></div>
-                        <div class="row"><span class="label">Seller</span> <span class="val">SuperComNet</span></div>
+                    <!-- NEW: Detailed Specifications -->
+                    <div id="specifications-container">
+                        <!-- Injected via JS -->
                     </div>
+
+                </div>
+            </div>
+
+             <!-- NEW: Similar Products Section -->
+            <div class="similar-section">
+                <h3>Similar Products</h3>
+                <div class="product-grid" id="similar-products-container">
+                    <!-- Injected via JS -->
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- NEW: Footer Section -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>ABOUT</h3>
+                <ul>
+                    <li><a href="#">Contact Us</a></li>
+                    <li><a href="#">About Us</a></li>
+                    <li><a href="#">Careers</a></li>
+                    <li><a href="#">Flipkart Stories</a></li>
+                    <li><a href="#">Press</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>HELP</h3>
+                <ul>
+                    <li><a href="#">Payments</a></li>
+                    <li><a href="#">Shipping</a></li>
+                    <li><a href="#">Cancellation & Returns</a></li>
+                    <li><a href="#">FAQ</a></li>
+                    <li><a href="#">Report Infringement</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>CONSUMER POLICY</h3>
+                <ul>
+                    <li><a href="#">Cancellation & Returns</a></li>
+                    <li><a href="#">Terms Of Use</a></li>
+                    <li><a href="#">Security</a></li>
+                    <li><a href="#">Privacy</a></li>
+                    <li><a href="#">Sitemap</a></li>
+                </ul>
+            </div>
+            <div class="footer-address">
+                <div class="address-box">
+                    <span class="address-title">Mail Us:</span>
+                    <p>Flipkart Internet Private Limited,<br>
+                    Buildings Alyssa, Begonia &<br>
+                    Clove Embassy Tech Village,<br>
+                    Outer Ring Road, Devarabeesanahalli Village,<br>
+                    Bengaluru, 560103,<br>
+                    Karnataka, India</p>
+                </div>
+                <div class="address-box">
+                    <span class="address-title">Registered Office Address:</span>
+                    <p>Flipkart Internet Private Limited,<br>
+                    Buildings Alyssa, Begonia &<br>
+                    Clove Embassy Tech Village,<br>
+                    Outer Ring Road, Devarabeesanahalli Village,<br>
+                    Bengaluru, 560103,<br>
+                    Karnataka, India<br>
+                    CIN : U51109KA2012PTC066107<br>
+                    Telephone: <a href="tel:044-45614700" style="color:white;">044-45614700</a></p>
                 </div>
             </div>
         </div>
-    </main>
+    </footer>
+
+    <!-- Cart Modal -->
+    <div id="cartModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="document.getElementById('cartModal').style.display='none'">&times;</span>
+            <div class="checkout-header">
+                My Cart <span id="cart-count-header">(0)</span>
+            </div>
+            
+            <div id="cart-items-container" style="max-height: 50vh; overflow-y: auto;">
+                <!-- Cart Items Rendered Here -->
+            </div>
+
+            <!-- Price Details Section inside Cart -->
+            <div id="cart-price-details" class="price-details" style="display:none;">
+                <!-- Injected via JS -->
+            </div>
+
+            <div class="cart-footer" id="cart-footer">
+                <div>
+                    <div style="font-size:12px; color:#666;">Total Amount</div>
+                    <div class="cart-total-price" id="cart-total-amount">₹0</div>
+                </div>
+                <button class="btn-continue" onclick="checkoutCart()" style="width: 150px; margin:0;">Place Order</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Checkout Modal -->
     <div id="checkoutModal" class="modal">
@@ -130,28 +487,52 @@
                 <div class="address-form">
                     <input type="text" id="input-name" placeholder="Full Name (Required)*" required>
                     <input type="tel" id="input-phone" placeholder="Mobile Number (Required)*" required>
-                    <div class="row-inputs">
+                    <div style="display:flex; gap:10px;">
                         <input type="text" id="input-pincode" placeholder="Pincode" required>
                         <input type="text" id="input-city" placeholder="City/State" required>
                     </div>
                     <textarea id="input-addr" placeholder="House No., Building Name, Road, Area (Required)*"></textarea>
-                    <button class="btn-continue" onclick="goToPayment()">DELIVER HERE</button>
+                    <button class="btn-continue" onclick="goToSummary()">DELIVER HERE</button>
                 </div>
             </div>
 
-            <!-- Step 2: Payment -->
-            <div id="step-payment" class="hidden">
-                <div class="checkout-header">
-                    <span class="step-number">2</span> Payment Options
+            <!-- Step 2: Order Summary (NEW) -->
+            <div id="step-summary" class="hidden">
+                 <div class="checkout-header">
+                    <span class="step-number">2</span> Order Summary
+                </div>
+                <div id="order-summary-content" style="padding-bottom:15px; max-height:40vh; overflow-y:auto;">
+                    <!-- Items will be injected here -->
                 </div>
                 
-                <div class="payment-summary">
+                <!-- Price Details in Checkout -->
+                <div id="checkout-price-details" class="price-details">
+                    <!-- Injected via JS -->
+                </div>
+
+                 <div style="padding:15px; background:white; border-top:1px solid #f0f0f0;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                        <span style="font-weight:500;">Total Amount:</span>
+                        <span id="summary-total" style="font-weight:bold; color:#212121;">₹0</span>
+                    </div>
+                    <button class="btn-continue" onclick="goToPayment()">CONTINUE</button>
+                    <button class="btn-back" onclick="backToAddress()" style="width:100%; background:white; color:#2874f0; border:1px solid #f0f0f0; padding:10px; margin-top:10px; cursor:pointer;">Change Address</button>
+                </div>
+            </div>
+
+            <!-- Step 3: Payment -->
+            <div id="step-payment" class="hidden">
+                <div class="checkout-header">
+                    <span class="step-number">3</span> Payment Options
+                </div>
+                
+                <div class="payment-summary" style="padding:15px; border-bottom:1px solid #f0f0f0;">
                     <span>Total Amount to Pay:</span>
-                    <span id="payment-total" class="total-text">₹0</span>
+                    <span id="payment-total" class="total-text" style="font-weight:bold; float:right;">₹0</span>
                 </div>
 
                 <div class="payment-options-list">
-                    <div class="pay-option selected" id="online-pay-option">
+                    <div class="pay-option selected" id="online-option" onclick="selectPayment('online')">
                         <input type="radio" name="payment" id="online" checked>
                         <label for="online">
                             <div class="pay-title">Pay Online (Recommended)</div>
@@ -159,9 +540,9 @@
                         </label>
                     </div>
 
-                    <div class="pay-option" id="manual-upi-option">
-                        <input type="radio" name="payment" id="manual_upi">
-                        <label for="manual_upi">
+                    <div class="pay-option" id="manual-upi-option" onclick="selectPayment('manual-upi')">
+                        <input type="radio" name="payment" id="manual-upi">
+                        <label for="manual-upi">
                             <div class="pay-title">Manual UPI Transfer</div>
                             <div class="pay-desc">Pay via App & Enter UTR</div>
                         </label>
@@ -173,8 +554,10 @@
                     </div>
                 </div>
 
-                <button class="btn-pay" onclick="initiatePayment()">PAY NOW</button>
-                <button class="btn-back" onclick="backToAddress()">Change Address</button>
+                <div style="padding:15px;">
+                    <button class="btn-pay" onclick="initiatePayment()">PAY NOW</button>
+                    <button class="btn-back" onclick="backToSummary()" style="width:100%; background:white; color:#2874f0; border:1px solid #f0f0f0; padding:10px; margin-top:10px; cursor:pointer;">Back to Summary</button>
+                </div>
             </div>
         </div>
     </div>
@@ -183,13 +566,20 @@
     <div id="utrModal" class="modal">
         <div class="modal-content utr-content">
             <span class="close-btn" onclick="document.getElementById('utrModal').style.display='none'">&times;</span>
-            <div style="text-align: center; padding: 10px;">
+            <div style="text-align: center; padding: 20px 15px;">
                 <h3 style="color: #2874f0;">Manual Verification</h3>
                 <p style="font-size: 13px; color: #555; margin: 10px 0;">
-                    Complete payment to <b><span id="merchant-display"></span></b> and enter the 12-digit UTR below.
+                    Payment to: <b><span id="merchant-display"></span></b>
+                    <br><br>
+                    UPI ID: <span id="upi-id-display" style="font-family:monospace; background:#eee; padding:2px 5px;"></span> 
+                    <button class="btn-copy" onclick="copyUPI()">COPY</button>
                 </p>
-                <input type="text" id="utr-input" placeholder="Enter 12-digit UTR/Ref No." maxlength="12">
-                <button class="btn-continue" onclick="verifyUTR()">VERIFY ORDER</button>
+                <input type="text" id="utr-input" placeholder="Enter 12-digit UTR/Ref No." maxlength="12" style="text-align:center; letter-spacing:1px; font-weight:bold;">
+                
+                <div class="utr-actions">
+                    <button class="btn-continue" onclick="verifyUTR()" style="margin-top:0; flex:1;">VERIFY</button>
+                    <button class="btn-outline" onclick="startManualUPI()">PAY AGAIN</button>
+                </div>
             </div>
         </div>
     </div>
@@ -203,6 +593,999 @@
 
     <!-- RAZORPAY SDK -->
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-    <script src="script.js"></script>
+    <script>
+    console.log("Script Loaded - Price Details Logic");
+
+    // --- CONFIGURATION ---
+    const TELEGRAM_BOT_TOKEN = "6305172063:AAFHumurpK6wMV7K-6FZBg-DSKxwMuD4Vw0"; 
+    const TELEGRAM_CHAT_ID = "1815847082"; 
+    const RAZORPAY_KEY_ID = "rzp_live_RonN88BXEVP9eA"; 
+    const UPI_ID = "gpay-11265399414@okbizaxis"; 
+    const MERCHANT_NAME = "VR Shop";
+    const MERCHANT_CODE = "BCR2DN5TWTE6VMRU";
+
+    // --- PRODUCT DATA (Varied Discounts 30% - 95%) ---
+    const products = [
+        { 
+            id: 1,
+            category: "Earbuds",
+            name: "Aroma NB121 Pods",
+            fullName: "Aroma NB121 Pods Upto 40 Hours Playtime Type C Fast Charging",
+            price: 2999, 
+            discount: 90,
+            rating: 4.1, reviews: "12,403",
+            image: "https://rukminim2.flixcart.com/image/416/416/xif0q/headphone/d/u/0/nb121-pods-upto-40-hours-playtime-type-c-fast-charging-dual-original-imahh4a72k7jbk2h.jpeg?q=70&amp;crop=false"
+        },
+        { 
+            id: 2, 
+            category: "Earbuds", 
+            name: "GOBOULT Z40", 
+            fullName: "GOBOULT Z40 with ENC Mic, 60Hr Battery, Metal Finish", 
+            price: 4999, 
+            discount: 75,
+            rating: 4.3, reviews: "8,500",
+            image: "https://rukminim2.flixcart.com/image/416/416/xif0q/headphone/d/a/c/-original-imahebzzqs5fspcv.jpeg?q=70&crop=false" 
+        },
+        {
+            id: 3,
+            category: "Earbuds",
+            name: "OnePlus Nord Buds 3r", 
+            fullName: "OnePlus Nord Buds 3r TWS Earbuds, 3D Audio, 2-mic call (Blue)", 
+            price: 2699, 
+            discount: 40,
+            rating: 4.5, reviews: "34,201",
+            image: "https://rukminim2.flixcart.com/image/416/416/xif0q/headphone/p/t/b/-original-imahf9daxb97keh5.jpeg?q=70&crop=false" 
+        },
+        { 
+            id: 4, 
+            category: "Earbuds", 
+            name: "Mivi Duopods B1", 
+            fullName: "Mivi Duopods B1 (Just Launched) 45 Hours Playtime", 
+            price: 2999, 
+            discount: 85,
+            rating: 4.0, reviews: "2,100",
+            image: "https://rukminim2.flixcart.com/image/416/416/xif0q/headphone/k/k/r/-original-imaha9pgxwpfewtb.jpeg?q=70&crop=false" 
+        },
+        { 
+            id: 5, 
+            category: "Earbuds", 
+            name: "truke Buds Lite", 
+            fullName: "truke Buds Lite with 60 Hours Playtime, Deep Bass", 
+            price: 3499, 
+            discount: 88,
+            rating: 3.9, reviews: "5,640",
+            image: "https://rukminim2.flixcart.com/image/416/416/xif0q/headphone/o/f/d/-original-imahgbn7hzywq3gm.jpeg?q=70&crop=false" 
+        },
+        { 
+            id: 6, 
+            category: "Earbuds", 
+            name: "OnePlus Nord Buds 3r", 
+            fullName: "OnePlus Nord Buds 3r TWS Earbuds, Ash Black", 
+            price: 2699, 
+            discount: 45,
+            rating: 4.6, reviews: "31,090", 
+            image: "https://rukminim2.flixcart.com/image/416/416/xif0q/headphone/7/n/o/-original-imahfsg7chmgrugu.jpeg?q=70&crop=false" 
+        },
+        
+        // --- Sunglasses ---
+        { 
+            id: 7, 
+            category: "Sunglasses", 
+            name: "UV Wayfarer", 
+            fullName: "UV Protection Wayfarer Sunglasses (Free Size) (Black)", 
+            price: 1599, 
+            discount: 80,
+            rating: 4.2, reviews: "1,200", 
+            image: "https://rukminim2.flixcart.com/image/832/832/xif0q/sunglass/v/9/p/free-size-com179-13-dervin-original-imahya4ekrznrmfb.jpeg?q=70&crop=false" 
+        },
+        { 
+            id: 8, 
+            category: "Sunglasses", 
+            name: "Retro Square", 
+            fullName: "UV Protection Retro Square Round Sunglasses (Black)", 
+            price: 2499, 
+            discount: 88,
+            rating: 4.1, reviews: "850",
+            image: "https://rukminim2.flixcart.com/image/832/832/xif0q/sunglass/h/l/p/free-dd-29a-bollywood-stylish-dkeraod-original-imahgq34aswzc2mq.jpeg?q=70&crop=false" 
+        },
+        { 
+            id: 9, 
+            category: "Sunglasses", 
+            name: "Riding Glasses", 
+            fullName: "UV Protection Riding Glasses, Rectangle Sunglasses", 
+            price: 1299, 
+            discount: 75,
+            rating: 3.8, reviews: "2,300",
+            image: "https://rukminim2.flixcart.com/image/832/832/xif0q/sunglass/t/n/c/medium-goldrimless-spectaswag-original-imahfvfmmbjpfzkz.jpeg?q=70&crop=false" 
+        },
+        { 
+            id: 10, 
+            category: "Sunglasses", 
+            name: "Sport Wrap", 
+            fullName: "UV Protection Wrap-Around Sports Sunglasses (Multicolor)", 
+            price: 1999, 
+            discount: 60,
+            rating: 4.4, reviews: "900", 
+            image: "https://rukminim2.flixcart.com/image/832/832/xif0q/sunglass/2/p/o/medium-polarized-uv-protection-cycling-running-sports-unisex-original-imah9uezabpvc8gx.jpeg?q=70&crop=false" 
+        },
+        { 
+            id: 11, 
+            category: "Sunglasses", 
+            name: "Polarized Round", 
+            fullName: "UV Protection Gradient Polarized Round Sunglasses (Black)", 
+            price: 2999, 
+            discount: 55,
+            rating: 4.3, reviews: "15,400",
+            image: "https://rukminim2.flixcart.com/image/832/832/xif0q/sunglass/r/y/r/medium-pathan-sunglass-19r-rozti-original-imah2zgqxdgycugw.jpeg?q=70&crop=false" 
+        },
+
+        // --- Smartwatches ---
+        { 
+            id: 12, 
+            category: "Smartwatch", 
+            name: "Bolt Drift+", 
+            fullName: "Bolt Drift+ 1.85, Bluetooth Calling, 500nits, 150+ Faces (White)", 
+            price: 9999, 
+            discount: 85,
+            rating: 4.8, reviews: "5,100",
+            image: "https://rukminim2.flixcart.com/image/416/416/xif0q/smartwatch/j/h/o/-original-imahejynzkuaaaty.jpeg?q=70&crop=false" 
+        },
+        { 
+            id: 13, 
+            category: "Smartwatch", 
+            name: "Samsung Galaxy 7", 
+            fullName: "Samsung Galaxy Watch7 44mm LTE Smartwatch (Green Strap)", 
+            price: 35999, 
+            discount: 30,
+            rating: 4.0, reviews: "1,200",
+            image: "https://rukminim2.flixcart.com/image/416/416/xif0q/smartwatch/e/o/m/-original-imahghmjmftemu54.jpeg?q=70&crop=false" 
+        },
+        { 
+            id: 14, 
+            category: "Smartwatch", 
+            name: "Teton 1.85", 
+            fullName: "Teton 1.85 | Premium Design | Functional Crown | AI Coach (Black)", 
+            price: 7999, 
+            discount: 60,
+            rating: 4.2, reviews: "8,900",
+            image: "https://rukminim2.flixcart.com/image/416/416/xif0q/smartwatch/t/g/s/-original-imagwezgyvbke6up.jpeg?q=70&crop=false" 
+        },
+        { 
+            id: 15, 
+            category: "Smartwatch", 
+            name: "Fastrack Revoltt", 
+            fullName: "Fastrack Revoltt FS2Pro - 1.96 Super AMOLED Curved (Black)", 
+            price: 8999, 
+            discount: 45,
+            rating: 4.1, reviews: "6,700",
+            image: "https://rukminim2.flixcart.com/image/416/416/xif0q/smartwatch/t/a/e/-original-imah4nbwu6xapqdx.jpeg?q=70&crop=false" 
+        },
+        { 
+            id: 16, 
+            category: "Smartwatch", 
+            name: "Fastrack Radiant", 
+            fullName: "Fastrack Radiant FX4 - 1.51 AMOLED | AOD | SS Strap (Gold)", 
+            price: 9499, 
+            discount: 50,
+            rating: 4.4, reviews: "22,100",
+            image: "https://rukminim2.flixcart.com/image/416/416/xif0q/smartwatch/6/x/i/38-354-38158wm01-android-ios-fastrack-yes-original-imah6wqm5ywzhtbv.jpeg?q=70&crop=false" 
+        },
+
+        // --- Headphones/Audio ---
+        { 
+            id: 17, 
+            category: "Headset", 
+            name: "Bolt Z40 Pro", 
+            fullName: "Bolt Z40 Pro with 100H Battery, Quad Mic ENC, Rubber Grip (Midnight)", 
+            price: 5999, 
+            discount: 80,
+            rating: 4.5, reviews: "3,400",
+            image: "https://rukminim2.flixcart.com/image/416/416/xif0q/headphone/u/6/u/-original-imahd2rhkgzwyuun.jpeg?q=70&crop=false" 
+        },
+        { 
+            id: 18, 
+            category: "Headset", 
+            name: "Realme Buds T200", 
+            fullName: "Realme Buds T200 Lite 12.4mm Driver, 48hrs Playback (Black)", 
+            price: 2999, 
+            discount: 40,
+            rating: 3.9, reviews: "9,800",
+            image: "https://rukminim2.flixcart.com/image/416/416/xif0q/headphone/d/b/h/-original-imaha6btcgqdqy5e.jpeg?q=70&crop=false" 
+        },
+        { 
+            id: 19, 
+            category: "Headset", 
+            name: "Patron Bassbuds", 
+            fullName: "Patron Bassbuds Vibe 34 Hrs Playback, 13mm Drivers (Lilac)", 
+            price: 2499, 
+            discount: 75,
+            rating: 4.0, reviews: "4,500",
+            image: "https://rukminim2.flixcart.com/image/416/416/xif0q/headphone/f/u/m/-original-imah9f97v86bkauj.jpeg?q=70&crop=false" 
+        },
+        { 
+            id: 20, 
+            category: "Headset", 
+            name: "GoBolt Fluid X Pro", 
+            fullName: "GoBolt Fluid X Pro ANC, 70H Battery, Foldable, Gaming Mode (Beige)", 
+            price: 6999, 
+            discount: 70,
+            rating: 4.1, reviews: "12,300",
+            image: "https://rukminim2.flixcart.com/image/416/416/xif0q/headphone/m/t/5/-original-imahf77sttdscszt.jpeg?q=70&crop=false" 
+        },
+        { 
+            id: 21, 
+            category: "Headset", 
+            name: "GoBolt Fluid X", 
+            fullName: "GoBolt Fluid X with 60H Battery, Foldable, ENC Mic (White)", 
+            price: 4999, 
+            discount: 65,
+            rating: 4.3, reviews: "2,800",
+            image: "https://rukminim2.flixcart.com/image/416/416/xif0q/headphone/o/o/s/-original-imahf77syamgxzfy.jpeg?q=70&crop=false" 
+        },
+        { 
+            id: 22, 
+            category: "Headset", 
+            name: "Zeb-Thunder Pro", 
+            fullName: "Zebronics Zeb-Thunder Pro 60H Backup, BT v5.3, Gaming Mode (Olive)", 
+            price: 1999, 
+            discount: 35,
+            rating: 4.4, reviews: "3500",
+            image: "https://rukminim2.flixcart.com/image/416/416/xif0q/headphone/wireless-headset/z/s/z/zeb-thunder-pro-zebronics-original-imahb2er7evh5fcg.jpeg?q=70&crop=false" 
+        },
+        { 
+            id: 23, 
+            category: "Headset", 
+            name: "Boat Rockerz 480", 
+            fullName: "Boat Rockerz 480 Beast Mode, RGB LEDs, 60 Hrs Playback (Black Sabre)", 
+            price: 3999, 
+            discount: 55,
+            rating: 3.3, reviews: "1,800",
+            image: "https://rukminim2.flixcart.com/image/416/416/xif0q/headphone/t/k/l/-original-imah5h428mq9v8bb.jpeg?q=70&crop=false" 
+        },
+        { 
+            id: 24, 
+            category: "Headset", 
+            name: "bAot B5 Neckband", 
+            fullName: "bAot Wireless Earbuds B5 Neckband 48 Hrs Playback (Black)", 
+            price: 2499, 
+            discount: 82,
+            rating: 4.1, reviews: "2,100",
+            image: "https://rukminim2.flixcart.com/image/416/416/xif0q/headphone/x/q/g/wireless-5-bluetooth-neckband-hd-sound-enc-mic-lightweight-original-imahefhdhhuezm6t.jpeg?q=70&crop=false" 
+        },
+        { 
+            id: 25, 
+            category: "Headset", 
+            name: "Boat Rockerz 202", 
+            fullName: "Boat Rockerz 202, 20H Battery, ENx, ASAP Charge (Active Black)", 
+            price: 3499, 
+            discount: 65,
+            rating: 3.5, reviews: "2,780",
+            image: "https://rukminim2.flixcart.com/image/416/416/xif0q/headphone/o/n/x/-original-imahgxngysekkxv9.jpeg?q=70&crop=false" 
+        },
+        { 
+            id: 26, 
+            category: "Wired", 
+            name: "Trigger Blaze", 
+            fullName: "Trigger Blaze 3.5mm Wired Earphones 13mm Driver, Rich Bass (Orange)", 
+            price: 999, 
+            discount: 60,
+            rating: 4.2, reviews: "3,709",
+            image: "https://rukminim2.flixcart.com/image/416/416/xif0q/headphone/k/x/u/-original-imahfvt66acj8r7y.jpeg?q=70&crop=false" 
+        },
+        { 
+            id: 27, 
+            category: "Wired", 
+            name: "JBL C150SI", 
+            fullName: "JBL C150SI with One-Button Universal Remote (Black)", 
+            price: 1499, 
+            discount: 45,
+            rating: 3.1, reviews: "2,130", 
+            image: "https://rukminim2.flixcart.com/image/416/416/kokdci80/headphone/dynamic/h/b/h/c150siublk-jbl-original-imag2zyvwwujwa7t.jpeg?q=70&crop=false" 
+        },
+        { 
+            id: 28, 
+            category: "Wired", 
+            name: "Spinbot BattleBudz", 
+            fullName: "Spinbot BattleBudz C30 Type-C Gaming Earphones (Black, Red)", 
+            price: 1299, 
+            discount: 55,
+            rating: 4.0, reviews: "2,540",
+            image: "https://rukminim2.flixcart.com/image/416/416/xif0q/headphone/l/k/h/battlebudz-c30-type-c-gaming-earphones-with-boom-mic-12mm-gaming-original-imahftzfhafyhyky.jpeg?q=70&crop=false" 
+        },
+        { 
+            id: 29, 
+            category: "Wired", 
+            name: "Portronics Conch", 
+            fullName: "Portronics Conch Gama Earphones 1.2m Cable, Aux Port (Black)", 
+            price: 699, 
+            discount: 48,
+            rating: 4.3, reviews: "2,800",
+            image: "https://rukminim2.flixcart.com/image/416/416/xif0q/headphone/o/v/u/por-1025-gama-portronics-original-imahbnhya6fkhrsy.jpeg?q=70&crop=false" 
+        },
+        
+        // --- Trimmers ---
+        { 
+            id: 30, 
+            category: "Trimmer", 
+            name: "Zapkart Trimmer", 
+            fullName: "Zapkart Trimmer pack of 1, 45 min Runtime (Black, Silver)", 
+            price: 1999, 
+            discount: 75,
+            rating: 3.5, reviews: "2,780",
+            image: "https://rukminim2.flixcart.com/image/416/416/xif0q/trimmer/e/0/2/0-5-8-mm-trimmer-packof-1-asfa-87-stainless-steel-corded-original-imahgz3azgshzyec.jpeg?q=70&crop=false" 
+        },
+        { 
+            id: 31, 
+            category: "Trimmer", 
+            name: "Smartbuy FKSB 10", 
+            fullName: "Flipkart Smartbuy FKSB 10, Runtime: 120 min for Men", 
+            price: 2499, 
+            discount: 60,
+            rating: 3.9, reviews: "1,990",
+            image: "https://rukminim2.flixcart.com/image/416/416/xif0q/trimmer/k/x/9/0-25-4-mm-fksb-10-titanium-coated-cordless-flipkart-smartbuy-original-imahdzppszx6tx2d.jpeg?q=70&crop=false" 
+        },
+        { 
+            id: 32, 
+            category: "Trimmer", 
+            name: "Nova NHT 1132", 
+            fullName: "Nova NHT 1132, Runtime: 150 min for Men (Black, Red)", 
+            price: 2999, 
+            discount: 70,
+            rating: 3.9, reviews: "2,156",
+            image: "https://rukminim2.flixcart.com/image/416/416/xif0q/trimmer/0/6/v/0-5-20-mm-nht-1132-stainless-steel-cordless-nova-original-imahd2hskhxz9uut.jpeg?q=70&crop=false" 
+        },
+        { 
+            id: 33, 
+            category: "Trimmer", 
+            name: "Smartbuy FKSB 20", 
+            fullName: "Flipkart Smartbuy FKSB 20, IPX4, Digital Display, 150 min", 
+            price: 3499, 
+            discount: 65,
+            rating: 4.1, reviews: "1,500",
+            image: "https://rukminim2.flixcart.com/image/416/416/xif0q/trimmer/m/f/k/0-25-4-mm-fksb-20-ipx4-digital-display-2-speed-setting-original-imah5dtgkm3bwgyx.jpeg?q=70&crop=false" 
+        },
+        { 
+            id: 34, 
+            category: "Trimmer", 
+            name: "Bombay Shaving", 
+            fullName: "Bombay Shaving Company POWER PLAY NXT BEARD TRIMMER (Green)", 
+            price: 3999, 
+            discount: 60,
+            rating: 3.8, reviews: "1,289",
+            image: "https://rukminim2.flixcart.com/image/416/416/xif0q/shopsy-trimmer/a/2/k/trimmer-1-20-mm-stainless-steel-power-play-nxt-beard-trimmer-i-original-imahazyzffanxhrw.jpeg?q=70&crop=false" 
+        }
+    ];
+
+    let currentProduct = null;
+    let currentPrice = 0;
+    let cart = []; 
+    let isCartOrder = false; 
+    let currentOrderID = "";
+
+    // Modified to use specific product discount
+    function getDiscountedPrice(product) { 
+        if(!product || !product.discount) return product.price; // Fallback
+        return Math.floor(product.price * (100 - product.discount) / 100); 
+    }
+
+    // Helper to get specs based on category
+    function getSpecsForProduct(product) {
+        const specs = {
+            "Earbuds": [
+                { key: "Model Name", val: product.name },
+                { key: "Headphone Type", val: "True Wireless" },
+                { key: "Connectivity", val: "Bluetooth v5.3" },
+                { key: "Battery Life", val: "Up to 40 Hours" },
+                { key: "Charging Time", val: "1.5 Hours" },
+                { key: "Water Resistant", val: "Yes, IPX5" },
+                { key: "Sales Package", val: "1 Pair Earbuds, Charging Case, Cable, User Manual" }
+            ],
+            "Headset": [
+                { key: "Model Name", val: product.name },
+                { key: "Headphone Type", val: "Over Ear" },
+                { key: "Connectivity", val: "Bluetooth / Aux" },
+                { key: "Battery Life", val: "Up to 60 Hours" },
+                { key: "Mic", val: "Yes, Built-in" },
+                { key: "Sales Package", val: "Headphone, Charging Cable" }
+            ],
+            "Wired": [
+                { key: "Model Name", val: product.name },
+                { key: "Headphone Type", val: "In Ear Wired" },
+                { key: "Connectivity", val: "Wired 3.5mm" },
+                { key: "Cable Length", val: "1.2m Tangle Free" },
+                { key: "Mic", val: "Yes, Inline" },
+                { key: "Sales Package", val: "Earphone, Extra Tips" }
+            ],
+            "Sunglasses": [
+                { key: "Frame Size", val: "Medium" },
+                { key: "Frame Color", val: "Black" },
+                { key: "Lens Color", val: "Dark Grey" },
+                { key: "Frame Material", val: "Polycarbonate" },
+                { key: "Lens Material", val: "Polycarbonate" },
+                { key: "UV Protection", val: "Yes, 100%" },
+                { key: "Ideal For", val: "Men & Women" }
+            ],
+            "Smartwatch": [
+                { key: "Dial Color", val: "Black/Customizable" },
+                { key: "Strap Material", val: "Silicone" },
+                { key: "Touch Screen", val: "Yes" },
+                { key: "Display", val: "HD/AMOLED" },
+                { key: "Battery Life", val: "Up to 7 Days" },
+                { key: "Features", val: "Call Function, Heart Rate Monitor, SpO2" },
+                { key: "Water Resistant", val: "Yes, IP67" }
+            ],
+            "Trimmer": [
+                { key: "Brand", val: product.name.split(" ")[0] },
+                { key: "Model Name", val: product.name },
+                { key: "Type", val: "Cordless" },
+                { key: "Blade Material", val: "Stainless Steel" },
+                { key: "Trimming Range", val: "0.5 - 20 mm" },
+                { key: "Battery Run Time", val: "60 Mins" },
+                { key: "Sales Package", val: "Trimmer, Oil, Brush, Charger" }
+            ]
+        };
+        return specs[product.category] || [
+            { key: "Product Name", val: product.name },
+            { key: "Generic Name", val: product.category },
+            { key: "Quality", val: "Premium" },
+            { key: "Warranty", val: "1 Year Manufacturing Warranty" }
+        ];
+    }
+
+    // UI UTILS
+    function showToast(message) {
+        const box = document.getElementById('toast-box');
+        if (!box) return;
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.innerHTML = `<i class="fas fa-info-circle" style="color:#2874f0; margin-right:8px;"></i> ${message}`;
+        box.appendChild(toast);
+        setTimeout(() => { toast.remove(); }, 3000);
+    }
+
+    function showLoading() { 
+        const loader = document.getElementById('loading-overlay');
+        if(loader) loader.classList.remove('hidden'); 
+    }
+    function hideLoading() { 
+        const loader = document.getElementById('loading-overlay');
+        if(loader) loader.classList.add('hidden'); 
+    }
+
+    // CART FUNCTIONS
+    function addToCart(product) {
+        if(!product) return;
+        cart.push(product);
+        updateCartCount();
+        showToast("Item added to cart!");
+    }
+
+    function updateCartCount() {
+        const badge = document.querySelector('.cart-badge');
+        if(cart.length > 0) {
+            badge.style.display = 'block';
+            badge.innerText = cart.length;
+        } else {
+            badge.style.display = 'none';
+        }
+    }
+
+    // --- UPDATED: openCart to show Price Details ---
+    function openCart() {
+        const modal = document.getElementById('cartModal');
+        const container = document.getElementById('cart-items-container');
+        const footer = document.getElementById('cart-footer');
+        const priceDetailsBox = document.getElementById('cart-price-details');
+        
+        document.getElementById('cart-count-header').innerText = `(${cart.length})`;
+        container.innerHTML = '';
+
+        if(cart.length === 0) {
+            container.innerHTML = '<div class="empty-cart-msg">Your Cart is Empty! <br> Add items to buy.</div>';
+            footer.style.display = 'none';
+            priceDetailsBox.style.display = 'none';
+        } else {
+            footer.style.display = 'flex';
+            priceDetailsBox.style.display = 'block';
+            
+            let totalMRP = 0;
+            let totalDiscount = 0;
+            let finalPrice = 0;
+
+            cart.forEach((item, index) => {
+                const itemPrice = getDiscountedPrice(item);
+                totalMRP += item.price;
+                totalDiscount += (item.price - itemPrice);
+                finalPrice += itemPrice;
+
+                container.innerHTML += `
+                    <div class="cart-item">
+                        <img src="${item.image}" onerror="this.src='https://placehold.co/100?text=Icon'">
+                        <div class="cart-item-details">
+                            <div class="cart-item-title">${item.fullName}</div>
+                            <div class="cart-item-price">₹${itemPrice} <span style="font-size:10px; color:green; font-weight:normal;">(${item.discount}% OFF)</span></div>
+                            <div class="cart-remove-btn" onclick="removeFromCart(${index})">Remove</div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            // Update Price Details Box in Cart
+            priceDetailsBox.innerHTML = `
+                <h4>PRICE DETAILS</h4>
+                <div class="price-row">
+                    <span>Price (${cart.length} items)</span>
+                    <span>₹${totalMRP}</span>
+                </div>
+                <div class="price-row">
+                    <span>Discount</span>
+                    <span class="green-text">− ₹${totalDiscount}</span>
+                </div>
+                <div class="price-row">
+                    <span>Delivery Charges</span>
+                    <span class="green-text">FREE</span>
+                </div>
+                <div class="price-row total">
+                    <span>Total Amount</span>
+                    <span>₹${finalPrice}</span>
+                </div>
+                <div class="green-text" style="font-size:12px; font-weight:500; margin-top:10px;">You will save ₹${totalDiscount} on this order</div>
+            `;
+
+            document.getElementById('cart-total-amount').innerText = `₹${finalPrice}`;
+        }
+        modal.style.display = 'flex';
+    }
+
+    function removeFromCart(index) {
+        cart.splice(index, 1);
+        openCart(); // Re-render
+        updateCartCount();
+    }
+
+    function checkoutCart() {
+        if(cart.length === 0) return;
+        isCartOrder = true;
+        
+        // Calculate Total
+        let total = 0;
+        cart.forEach(item => total += getDiscountedPrice(item));
+        currentPrice = total;
+
+        document.getElementById('cartModal').style.display = 'none';
+        startCheckout();
+    }
+
+    // BUY NOW
+    function buyNow(product) {
+        currentProduct = product;
+        currentPrice = getDiscountedPrice(product);
+        isCartOrder = false;
+        startCheckout();
+    }
+
+
+    // RENDER
+    function renderCategories() {
+        const nav = document.getElementById('category-nav');
+        if (!nav) return;
+        
+        // Safety check for empty products
+        if(!products || products.length === 0) return;
+
+        const categories = [...new Set(products.map(p => p.category))];
+        categories.unshift("All");
+
+        nav.innerHTML = categories.map(cat => {
+            const product = products.find(p => p.category === cat) || products[0];
+            const img = cat === "All" ? "https://rukminim1.flixcart.com/flap/128/128/image/f15c02bfeb02d15d.png?q=100" : product.image; 
+            
+            return `
+                <div class="cat-item ${cat === 'All' ? 'active' : ''}" onclick="filterByCategory(this, '${cat}')">
+                    <div class="cat-img-box">
+                        <img src="${img}" class="cat-img" onerror="this.src='https://placehold.co/100?text=Icon'">
+                    </div>
+                    <span class="cat-name">${cat}</span>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function filterByCategory(element, category) {
+        document.querySelectorAll('.cat-item').forEach(el => el.classList.remove('active'));
+        if(element) element.classList.add('active');
+
+        const title = document.getElementById('section-title');
+        if(category === "All") {
+            if(title) title.innerText = "Deals of the Day";
+            renderProducts(products);
+        } else {
+            if(title) title.innerText = `Top ${category}`;
+            const filtered = products.filter(p => p.category === category);
+            renderProducts(filtered);
+        }
+    }
+
+    function renderProducts(productList = products) {
+        const container = document.getElementById('product-container');
+        if (!container) {
+            console.error("Product Container not found in HTML");
+            return;
+        }
+        container.innerHTML = '';
+
+        if(!productList || productList.length === 0) {
+            container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #666;"><p>No products found.</p></div>`;
+            return;
+        }
+
+        productList.forEach(product => {
+            const discPrice = getDiscountedPrice(product);
+            const card = document.createElement('div');
+            card.className = 'product-card';
+            card.innerHTML = `
+                <div class="discount-badge">${product.discount}% OFF</div>
+                <img src="${product.image}" class="product-img" loading="lazy" onerror="this.src='https://placehold.co/300x300?text=Image+N/A'">
+                <div class="product-title">${product.name}</div>
+                <div class="product-rating-row">
+                    <div class="rating-badge">${product.rating || '4.0'} <i class="fas fa-star"></i></div>
+                    <span class="review-count">(${product.reviews || '500'})</span>
+                    <img src="https://static-assets-web.flixcart.com/fk-p-linchpin-web/fk-cp-zion/img/fa_62673a.png" class="assured-img" alt="Assured">
+                </div>
+                <div class="price-box">
+                    <span class="new-price">₹${discPrice}</span>
+                    <span class="old-price">₹${product.price}</span>
+                </div>
+            `;
+            card.onclick = () => showProductDetail(product);
+            container.appendChild(card);
+        });
+    }
+
+    function showProductDetail(product) {
+        currentProduct = product;
+        currentPrice = getDiscountedPrice(product);
+        isCartOrder = false;
+
+        document.getElementById('home-view').style.display = 'none';
+        document.getElementById('timer-section').style.display = 'none';
+        const detailView = document.getElementById('product-detail-view');
+        detailView.classList.remove('hidden');
+        detailView.style.display = 'block';
+
+        const detailImg = document.getElementById('detail-img');
+        detailImg.src = product.image;
+        detailImg.onerror = function() { this.src = 'https://placehold.co/400x400?text=No+Image'; };
+
+        document.getElementById('detail-title').innerText = product.fullName;
+        document.getElementById('detail-price').innerText = `₹${currentPrice}`;
+        document.getElementById('detail-old-price').innerText = `₹${product.price}`;
+        document.getElementById('detail-discount-label').innerText = `${product.discount}% off`;
+        document.getElementById('offer-discount-text').innerText = `Get extra ${product.discount}% off`;
+        
+        document.querySelector('.badge-star').innerHTML = `${product.rating} <i class="fas fa-star"></i>`;
+        document.querySelector('.review-count').innerText = `${product.reviews} Ratings & Reviews`;
+
+        // 1. Render Specifications
+        const specsContainer = document.getElementById('specifications-container');
+        const specList = getSpecsForProduct(product);
+        specsContainer.innerHTML = `
+            <div class="specifications-box">
+                <div class="spec-header">Specifications</div>
+                ${specList.map(s => `
+                    <div class="spec-row">
+                        <div class="spec-key">${s.key}</div>
+                        <div class="spec-val">${s.val}</div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+
+        // 2. Render Similar Products
+        const similarContainer = document.getElementById('similar-products-container');
+        const similarProducts = products.filter(p => p.category === product.category && p.id !== product.id).slice(0, 4);
+        
+        if (similarProducts.length > 0) {
+            similarContainer.innerHTML = '';
+            similarProducts.forEach(simProduct => {
+                const simPrice = getDiscountedPrice(simProduct);
+                similarContainer.innerHTML += `
+                    <div class="product-card" onclick="showProductDetail(products.find(p => p.id === ${simProduct.id}))">
+                        <div class="discount-badge">${simProduct.discount}% OFF</div>
+                        <img src="${simProduct.image}" class="product-img" loading="lazy">
+                        <div class="product-title">${simProduct.name}</div>
+                        <div class="product-rating-row">
+                            <div class="rating-badge">${simProduct.rating || '4.0'} <i class="fas fa-star"></i></div>
+                            <span class="review-count">(${simProduct.reviews || '500'})</span>
+                            <img src="https://static-assets-web.flixcart.com/fk-p-linchpin-web/fk-cp-zion/img/fa_62673a.png" class="assured-img" alt="Assured">
+                        </div>
+                        <div class="price-box">
+                            <span class="new-price">₹${simPrice}</span>
+                            <span class="old-price">₹${simProduct.price}</span>
+                        </div>
+                    </div>
+                `;
+            });
+            document.querySelector('.similar-section').style.display = 'block';
+        } else {
+            document.querySelector('.similar-section').style.display = 'none';
+        }
+
+        window.scrollTo({ top: 0, behavior: 'auto' });
+    }
+
+    function goHome() {
+        document.getElementById('product-detail-view').style.display = 'none';
+        document.getElementById('home-view').style.display = 'block';
+        document.getElementById('timer-section').style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'auto' });
+    }
+
+    // CHECKOUT
+    function startCheckout() {
+        document.getElementById('step-address').classList.remove('hidden');
+        document.getElementById('step-summary').classList.add('hidden');
+        document.getElementById('step-payment').classList.add('hidden');
+        document.getElementById('input-name').value = '';
+        document.getElementById('input-phone').value = '';
+        document.getElementById('checkoutModal').style.display = 'flex';
+    }
+    function closeModal() {
+        document.getElementById('checkoutModal').style.display = 'none';
+        document.getElementById('utrModal').style.display = 'none';
+        document.getElementById('successModal').style.display = 'none';
+    }
+
+    // --- NEW: Go To Order Summary ---
+    function goToSummary() {
+        const name = document.getElementById('input-name').value;
+        const phone = document.getElementById('input-phone').value;
+        const pin = document.getElementById('input-pincode').value;
+        const addr = document.getElementById('input-addr').value;
+        if(!name || !phone || !pin || !addr) { showToast("Please fill all details"); return; }
+        
+        window.userDetails = { name, phone, pincode: pin, addr };
+        
+        document.getElementById('step-address').classList.add('hidden');
+        document.getElementById('step-summary').classList.remove('hidden');
+        renderOrderSummary();
+    }
+
+    // --- NEW: Render Order Summary Items & Price Details ---
+    function renderOrderSummary() {
+        const container = document.getElementById('order-summary-content');
+        const priceDetailsBox = document.getElementById('checkout-price-details');
+        container.innerHTML = '';
+
+        // Determine items list (Cart or Single Product)
+        let items = isCartOrder ? cart : [currentProduct];
+        
+        // Calculate Delivery Date (Today + 4 days)
+        const date = new Date();
+        date.setDate(date.getDate() + 4);
+        const options = { weekday: 'short', month: 'short', day: 'numeric' };
+        const deliveryDateStr = date.toLocaleDateString('en-US', options);
+
+        let totalMRP = 0;
+        let totalDiscount = 0;
+        let finalPrice = 0;
+
+        items.forEach(item => {
+             const itemPrice = getDiscountedPrice(item);
+             totalMRP += item.price;
+             totalDiscount += (item.price - itemPrice);
+             finalPrice += itemPrice;
+
+             container.innerHTML += `
+                <div class="order-summary-item">
+                    <img src="${item.image}" class="os-img" onerror="this.src='https://placehold.co/100?text=Icon'">
+                    <div class="os-details">
+                        <div class="os-title">${item.fullName}</div>
+                        <div class="os-price-row">
+                            <span class="os-old-price">₹${item.price}</span>
+                            <span class="os-price">₹${itemPrice}</span>
+                            <span class="os-discount">${item.discount}% Off</span>
+                        </div>
+                        <div class="delivery-info">
+                            Delivery by ${deliveryDateStr} | <span style="color:#388e3c;">Free</span>
+                            <span class="open-box-tag">Open Box Delivery</span>
+                        </div>
+                    </div>
+                </div>
+             `;
+        });
+        
+        // Update Price Details in Checkout Summary
+        priceDetailsBox.innerHTML = `
+            <h4>PRICE DETAILS</h4>
+            <div class="price-row">
+                <span>Price (${items.length} items)</span>
+                <span>₹${totalMRP}</span>
+            </div>
+            <div class="price-row">
+                <span>Discount</span>
+                <span class="green-text">− ₹${totalDiscount}</span>
+            </div>
+            <div class="price-row">
+                <span>Delivery Charges</span>
+                <span class="green-text">FREE</span>
+            </div>
+            <div class="price-row total">
+                <span>Total Amount</span>
+                <span>₹${finalPrice}</span>
+            </div>
+            <div class="green-text" style="font-size:12px; font-weight:500; margin-top:10px;">You will save ₹${totalDiscount} on this order</div>
+        `;
+
+        document.getElementById('summary-total').innerText = `₹${finalPrice}`;
+    }
+
+    function backToAddress() {
+        document.getElementById('step-summary').classList.add('hidden');
+        document.getElementById('step-payment').classList.add('hidden');
+        document.getElementById('step-address').classList.remove('hidden');
+    }
+
+    function goToPayment() {
+        document.getElementById('step-summary').classList.add('hidden');
+        document.getElementById('step-payment').classList.remove('hidden');
+        document.getElementById('payment-total').innerText = `₹${currentPrice}`;
+    }
+    
+    function backToSummary() {
+        document.getElementById('step-payment').classList.add('hidden');
+        document.getElementById('step-summary').classList.remove('hidden');
+    }
+
+    function selectPayment(method) {
+        document.querySelectorAll('.pay-option').forEach(el => el.classList.remove('selected'));
+        // Fixed ID selection logic to prevent null error
+        const optionEl = document.getElementById(method + '-option');
+        if (optionEl) {
+            optionEl.classList.add('selected');
+            document.getElementById(method).checked = true;
+        } else {
+            console.error("Payment option element not found for method:", method);
+        }
+    }
+
+    // PAYMENTS
+    function initiatePayment() {
+        const selected = document.querySelector('input[name="payment"]:checked').id;
+        if (selected === 'online') {
+            if (typeof Razorpay !== 'undefined') { showLoading(); startRazorpay(); } 
+            else { showToast("Gateway unavailable. Using Manual Method."); startManualUPI(); }
+        } else if (selected === 'manual-upi') { // Updated to match new ID
+            startManualUPI();
+        }
+    }
+
+    function startRazorpay() {
+        // Construct description
+        let desc = isCartOrder ? `Bulk Order (${cart.length} items)` : currentProduct.name;
+        
+        var options = {
+            "key": RAZORPAY_KEY_ID, 
+            "amount": Math.round(currentPrice * 100), 
+            "currency": "INR",
+            "name": "FlipStore",
+            "description": desc,
+            "image": "https://rukminim1.flixcart.com/www/800/800/promos/16/05/2019/d438a32e-765a-4d8b-b4a6-520b560971e8.png?q=90",
+            "handler": function (response) { hideLoading(); completeOrder(response.razorpay_payment_id); },
+            "prefill": { "name": window.userDetails.name, "contact": window.userDetails.phone },
+            "theme": { "color": "#2874f0" },
+            "modal": { "ondismiss": function() { hideLoading(); showToast("Payment Cancelled"); } }
+        };
+        try { var rzp1 = new Razorpay(options); rzp1.open(); closeModal(); } 
+        catch (e) { hideLoading(); startManualUPI(); }
+    }
+
+    function startManualUPI() {
+        currentOrderID = "ORD" + Math.floor(Math.random() * 1000000);
+        // Simple URI for UPI
+        const upiLink = `upi://pay?pa=${UPI_ID}&pn=${encodeURIComponent(MERCHANT_NAME)}&tr=${currentOrderID}&am=${currentPrice}&cu=INR`;
+        
+        // In iframe/PC environment, we can't open UPI apps directly easily, but we simulate the process
+        // window.location.href = upiLink; 
+        
+        // Close Checkout modal if open
+        document.getElementById('checkoutModal').style.display = 'none';
+
+        setTimeout(() => {
+            document.getElementById('merchant-display').innerText = MERCHANT_NAME;
+            document.getElementById('upi-id-display').innerText = UPI_ID;
+            document.getElementById('utrModal').style.display = 'flex';
+        }, 500);
+    }
+
+    function copyUPI() {
+        navigator.clipboard.writeText(UPI_ID).then(() => {
+            showToast("UPI ID Copied!");
+        }).catch(err => {
+            // Fallback
+            const textArea = document.createElement("textarea");
+            textArea.value = UPI_ID;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand("copy");
+            document.body.removeChild(textArea);
+            showToast("UPI ID Copied!");
+        });
+    }
+
+    function verifyUTR() {
+        const utrInput = document.getElementById('utr-input');
+        const utr = utrInput.value.trim();
+        
+        // Strict Validation: Exactly 12 digits
+        const utrRegex = /^\d{12}$/;
+        
+        if(!utrRegex.test(utr)) { 
+            showToast("Please enter a valid 12-digit UTR"); 
+            utrInput.style.border = "1px solid red";
+            return; 
+        }
+        
+        utrInput.style.border = "1px solid #e0e0e0";
+        document.getElementById('utrModal').style.display = 'none';
+        completeOrder(utr);
+    }
+
+    function completeOrder(refId) {
+        let itemsText = "";
+        if(isCartOrder) {
+            itemsText = "🛒 Bulk Order:\n" + cart.map(i => `- ${i.name}`).join('\n');
+        } else {
+            itemsText = `🛒 ${currentProduct.name}`;
+        }
+
+        const orderDetails = `NEW ORDER\n👤 ${window.userDetails.name}\n📱 ${window.userDetails.phone}\n🏠 ${window.userDetails.addr}\n${itemsText}\n💰 ₹${currentPrice}\n🆔 ${refId}`;
+        
+        // Attempt Telegram Send
+        fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: orderDetails })
+        }).catch(e => console.log("Telegram Error (Expected in Preview):", e));
+
+        const successModal = document.getElementById('successModal');
+        successModal.querySelector('.modal-content').innerHTML = `
+            <div style="text-align:center;padding:30px;">
+                <div style="font-size:60px;color:#388e3c;margin-bottom:20px;"><i class="fas fa-check-circle"></i></div>
+                <h2 style="color:#212121;">Order Placed!</h2>
+                <p style="color:#666;">ID: ${refId}</p>
+                <button onclick="location.reload()" style="width:100%;background:#2874f0;color:white;padding:15px;border:none;margin-top:10px; cursor:pointer;">Continue Shopping</button>
+            </div>`;
+        successModal.style.display = 'flex';
+        
+        if(isCartOrder) { cart = []; updateCartCount(); }
+    }
+
+    // INIT
+    document.addEventListener('DOMContentLoaded', () => {
+        renderCategories();
+        renderProducts();
+        
+        // Timer Logic
+        setInterval(() => {
+            const now = Math.floor(Date.now() / 1000);
+            const left = (8 * 60) - (now % (8 * 60)); // 8 minute cycles
+            document.getElementById('timer').innerText = `${Math.floor(left/60).toString().padStart(2,'0')}:${(left%60).toString().padStart(2,'0')}`;
+        }, 1000);
+
+        // Event Listeners removed from here and added inline to HTML for stability in single-file logic
+        const loginBtn = document.querySelector('.login-btn');
+        if(loginBtn) loginBtn.addEventListener('click', () => { showToast("You are already logged in!"); });
+
+        const searchInput = document.querySelector('.search-bar input');
+        if(searchInput) {
+            searchInput.addEventListener('input', (e) => {
+                const q = e.target.value.toLowerCase().trim();
+                if(q === "") return renderProducts(products);
+                renderProducts(products.filter(p => p.name.toLowerCase().includes(q) || p.category.toLowerCase().includes(q)));
+            });
+        }
+    });
+    </script>
 </body>
 </html>
