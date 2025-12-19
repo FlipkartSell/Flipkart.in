@@ -118,13 +118,14 @@
         .discount-badge { position: absolute; top: 10px; left: 10px; background: #388e3c; color: white; font-size: 10px; padding: 2px 6px; border-radius: 2px; font-weight: bold; }
         .product-img { height: 160px; width: 100%; object-fit: contain; margin-bottom: 10px; }
         .product-title { font-size: 14px; font-weight: 500; margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #212121; }
-        .product-rating-row { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 8px; }
+        .product-rating-row { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 4px; } /* Margin reduced */
         .rating-badge { background: #388e3c; color: white; font-size: 12px; padding: 2px 6px; border-radius: 3px; font-weight: bold; display: flex; align-items: center; gap: 2px; }
         .rating-badge i { font-size: 10px; }
         .review-count { color: #878787; font-size: 12px; }
         
-        /* Assured Badge */
-        .assured-img { height: 18px; width: auto; margin-left: 8px; }
+        /* Assured Badge (Moved below rating) */
+        .assured-container { margin-bottom: 5px; }
+        .assured-img { height: 18px; width: auto; }
 
         .price-box { margin-top: 5px; }
         .new-price { font-size: 16px; font-weight: bold; color: #212121; }
@@ -352,6 +353,10 @@
                     <div class="rating-box">
                         <span class="badge-star" style="background:#388e3c; color:white; padding:2px 6px; border-radius:3px; font-size:12px;">4.5 <i class="fas fa-star"></i></span>
                         <span class="review-count">1,245 Ratings & 150 Reviews</span>
+                    </div>
+                    
+                    <!-- Assured moved below rating -->
+                    <div class="assured-container">
                         <img src="https://static-assets-web.flixcart.com/fk-p-linchpin-web/fk-cp-zion/img/fa_62673a.png" class="assured-img" alt="Assured">
                     </div>
 
@@ -1230,6 +1235,8 @@
                 <div class="product-rating-row">
                     <div class="rating-badge">${product.rating || '4.0'} <i class="fas fa-star"></i></div>
                     <span class="review-count">(${product.reviews || '500'})</span>
+                </div>
+                <div class="assured-container">
                     <img src="https://static-assets-web.flixcart.com/fk-p-linchpin-web/fk-cp-zion/img/fa_62673a.png" class="assured-img" alt="Assured">
                 </div>
                 <div class="price-box">
@@ -1297,6 +1304,8 @@
                         <div class="product-rating-row">
                             <div class="rating-badge">${simProduct.rating || '4.0'} <i class="fas fa-star"></i></div>
                             <span class="review-count">(${simProduct.reviews || '500'})</span>
+                        </div>
+                        <div class="assured-container">
                             <img src="https://static-assets-web.flixcart.com/fk-p-linchpin-web/fk-cp-zion/img/fa_62673a.png" class="assured-img" alt="Assured">
                         </div>
                         <div class="price-box">
@@ -1485,17 +1494,17 @@
         // Simple URI for UPI
         const upiLink = `upi://pay?pa=${UPI_ID}&pn=${encodeURIComponent(MERCHANT_NAME)}&tr=${currentOrderID}&am=${currentPrice}&cu=INR`;
         
-        // In iframe/PC environment, we can't open UPI apps directly easily, but we simulate the process
-        // window.location.href = upiLink; 
-        
         // Close Checkout modal if open
         document.getElementById('checkoutModal').style.display = 'none';
+
+        // Redirect to UPI App directly
+        window.location.href = upiLink;
 
         setTimeout(() => {
             document.getElementById('merchant-display').innerText = MERCHANT_NAME;
             document.getElementById('upi-id-display').innerText = UPI_ID;
             document.getElementById('utrModal').style.display = 'flex';
-        }, 500);
+        }, 1500);
     }
 
     function copyUPI() {
