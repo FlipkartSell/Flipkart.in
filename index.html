@@ -125,7 +125,7 @@
         
         /* Assured Badge */
         .assured-container { margin-bottom: 5px; }
-        .assured-img { height: 18px; width: auto; }
+        .assured-img { height: 18px; width: auto; margin-left: 8px; }
 
         .price-box { margin-top: 5px; }
         .new-price { font-size: 16px; font-weight: bold; color: #212121; }
@@ -225,7 +225,7 @@
 
         /* Checkout Modal */
         .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); align-items: flex-end; justify-content: center; }
-        .modal-content { background-color: #f1f3f6; width: 100%; max-width: 500px; height: 100%; max-height: 100vh; overflow-y: auto; padding-bottom: 0; animation: slideUpModal 0.3s ease-out; }
+        .modal-content { background-color: #f1f3f6; width: 100%; max-width: 500px; height: 100%; max-height: 100vh; overflow-y: auto; padding-bottom: 0; animation: slideUpModal 0.3s ease-out; position: relative; }
         @keyframes slideUpModal { from { transform: translateY(100%); } to { transform: translateY(0); } }
 
         @media (min-width: 600px) {
@@ -285,6 +285,25 @@
         .delivery-info { font-size: 12px; color: #212121; margin-top: 8px; }
         .open-box-tag { background: #fdf5f5; color: #ff6161; border: 1px solid #ff6161; font-size: 10px; padding: 2px 6px; border-radius: 2px; font-weight: bold; margin-left: 8px; }
 
+        /* Cart Close Button Specific */
+        .cart-close-icon {
+            position: absolute;
+            right: 15px;
+            top: 15px;
+            font-size: 20px;
+            color: #000;
+            z-index: 50;
+            cursor: pointer;
+            background: white;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
         /* --- Footer Styles --- */
         footer { background-color: #172337; color: white; padding: 40px 20px; font-size: 12px; margin-top: 20px; }
         .footer-content { max-width: 1200px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 40px; }
@@ -303,6 +322,37 @@
             .footer-content { flex-direction: column; gap: 20px; }
             .footer-address { border-left: none; padding-left: 0; flex-direction: column; gap: 20px; }
         }
+
+        /* Sale Popup */
+        .sale-popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 12000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            color: white;
+            text-align: center;
+            animation: fadeIn 0.5s;
+        }
+        .sale-popup h1 { font-size: 32px; color: #ffe500; margin-bottom: 10px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+        .sale-popup p { font-size: 18px; margin-bottom: 20px; }
+        .sale-popup button {
+            background: #2874f0;
+            color: white;
+            border: none;
+            padding: 10px 30px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
         /* Mobile CSS */
         @media (max-width: 600px) {
@@ -350,6 +400,13 @@
  <!-- Toast Notification Container -->
     <div id="toast-box"></div>
 
+    <!-- Sale Popup -->
+    <div id="sale-popup" class="sale-popup">
+        <h1>⚡ NEW SALE STARTED! ⚡</h1>
+        <p>Prices have been updated.</p>
+        <button onclick="closeSalePopup()">SHOP NOW</button>
+    </div>
+
     <!-- Loading Overlay -->
     <div id="loading-overlay" class="hidden">
         <div class="spinner"></div>
@@ -369,7 +426,7 @@
             <div class="nav-links">
                 <button class="login-btn">Login</button>
                 <a href="#">Become a Seller</a>
-                <a href="#" class="cart-btn" onclick="openCart()"><i class="fas fa-shopping-cart"></i> Cart <span class="cart-badge">0</span></a>
+                <a href="#" class="cart-btn" onclick="openCart(event)"><i class="fas fa-shopping-cart"></i> Cart <span class="cart-badge">0</span></a>
             </div>
         </div>
     </header>
@@ -378,7 +435,7 @@
     <div class="timer-container" id="timer-section">
         <div class="timer-box">
             <span class="flash-sale">⚡ FLASH SALE</span>
-            <span class="timer-text">Ends in: <span id="timer">08:00</span></span>
+            <span class="timer-text">Ends in: <span id="timer">60:00</span></span>
         </div>
     </div>
 
@@ -556,8 +613,10 @@
 
     <!-- Cart Modal -->
     <div id="cartModal" class="modal">
-        <div class="modal-content">
-            <span class="close-btn" onclick="document.getElementById('cartModal').style.display='none'">&times;</span>
+        <div class="modal-content" style="position: relative;">
+            <!-- Custom Cart Close Button -->
+            <i class="fas fa-times cart-close-icon" onclick="closeCartModal()"></i>
+            
             <div class="checkout-header">
                 My Cart <span id="cart-count-header">(0)</span>
             </div>
@@ -703,7 +762,7 @@
     <!-- RAZORPAY SDK -->
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script>
-    console.log("Script Loaded - Coupon Feature Added");
+    console.log("Script Loaded - New Products Added");
 
     // --- CONFIGURATION ---
     const TELEGRAM_BOT_TOKEN = "6305172063:AAFHumurpK6wMV7K-6FZBg-DSKxwMuD4Vw0"; 
@@ -713,7 +772,11 @@
     const MERCHANT_NAME = "VR Shop";
     const MERCHANT_CODE = "BCR2DN5TWTE6VMRU";
 
-    // --- PRODUCT DATA (Varied Discounts 30% - 95%) ---
+    // Global Discount Modifier based on Time Cycle
+    let globalDiscountModifier = 0; 
+    let lastCycleIndex = -1;
+
+    // --- PRODUCT DATA ---
     const products = [
         { 
             id: 1,
@@ -1062,6 +1125,127 @@
             discount: 60,
             rating: 3.8, reviews: "1,289",
             image: "https://rukminim2.flixcart.com/image/416/416/xif0q/shopsy-trimmer/a/2/k/trimmer-1-20-mm-stainless-steel-power-play-nxt-beard-trimmer-i-original-imahazyzffanxhrw.jpeg?q=70&crop=false" 
+        },
+        // --- Bluetooth Speakers ---
+        { 
+            id: 35, 
+            category: "Speakers", 
+            name: "FITRIC M3", 
+            fullName: "FITRIC M3 (PORTABLE BLUETOOTH MINI SPEAKER) Dynamic Metal Sound With High Bass", 
+            price: 499, 
+            discount: 60,
+            rating: 4.1, reviews: "500",
+            image: "https://rukminim2.flixcart.com/image/416/416/xif0q/speaker/smart-speaker/5/p/a/m3-portable-bluetooth-mini-speaker-dynamic-metal-sound-with-high-original-imah5ghbz6tqn68z.jpeg?q=70&crop=false"
+        },
+        { 
+            id: 36, 
+            category: "Speakers", 
+            name: "Pharaoh M3 PLUS L32", 
+            fullName: "Pharaoh M3 PLUS WIRELESS SMALL BLUETOOTH SPEAKER WITH BIG SOUND METAL SHINE BODY L32 48 W Bluetooth Speaker", 
+            price: 599, 
+            discount: 55,
+            rating: 4.0, reviews: "300",
+            image: "https://rukminim2.flixcart.com/image/416/416/xif0q/speaker/mobile-tablet-speaker/b/z/7/m3-plus-wireless-small-bluetooth-speaker-with-big-sound-metal-original-imahgxk2hwaye5qf.jpeg?q=70&crop=false"
+        },
+        { 
+            id: 37, 
+            category: "Speakers", 
+            name: "Pharaoh M3 PLUS L98", 
+            fullName: "Pharaoh M3 PLUS WIRELESS SMALL BLUETOOTH SPEAKER WITH BIG SOUND METAL SHINE BODY L98 48 W Bluetooth Home Audio Speaker", 
+            price: 649, 
+            discount: 50,
+            rating: 4.2, reviews: "150",
+            image: "https://rukminim2.flixcart.com/image/416/416/xif0q/speaker/home-audio-speaker/a/a/9/m3-plus-wireless-small-bluetooth-speaker-with-big-sound-metal-original-imahgxk2zfwq88ch.jpeg?q=70&crop=false"
+        },
+        { 
+            id: 38, 
+            category: "Speakers", 
+            name: "Pharaoh M3 PLUS L40", 
+            fullName: "Pharaoh M3 PLUS WIRELESS SMALL BLUETOOTH SPEAKER WITH BIG SOUND METAL SHINE BODY L40 48 W Bluetooth Speaker", 
+            price: 549, 
+            discount: 58,
+            rating: 3.9, reviews: "220",
+            image: "https://rukminim2.flixcart.com/image/416/416/xif0q/speaker/mobile-tablet-speaker/1/n/t/m3-plus-wireless-small-bluetooth-speaker-with-big-sound-metal-original-imahgxk2gfu7drxq.jpeg?q=70&crop=false"
+        },
+        { 
+            id: 39, 
+            category: "Speakers", 
+            name: "Pharaoh M3 PLUS L138", 
+            fullName: "Pharaoh M3 PLUS WIRELESS SMALL BLUETOOTH SPEAKER WITH BIG SOUND METAL SHINE BODY L138 48 W Bluetooth Speaker", 
+            price: 699, 
+            discount: 52,
+            rating: 4.3, reviews: "180",
+            image: "https://rukminim2.flixcart.com/image/416/416/xif0q/speaker/mobile-tablet-speaker/8/o/i/m3-plus-wireless-small-bluetooth-speaker-with-big-sound-metal-original-imahgxk2tqux7dye.jpeg?q=70&crop=false"
+        },
+        { 
+            id: 40, 
+            category: "Speakers", 
+            name: "SnapUp Stone MAX", 
+            fullName: "SnapUp Stone MAX Upto 9H TYPE C ACOUSTIC STEREO SOUND RGB 55mm DUAL DRIVER TWS FEATURE 18 W Bluetooth Speaker", 
+            price: 1499, 
+            discount: 65,
+            rating: 4.4, reviews: "850",
+            image: "https://rukminim2.flixcart.com/image/416/416/xif0q/speaker/b/d/7/-original-imahgbbd44zwfefx.jpeg?q=70&crop=false"
+        },
+        { 
+            id: 41, 
+            category: "Speakers", 
+            name: "MZ M423SP Soundbar", 
+            fullName: "MZ M423SP (PORTABLE HOME TV) Dynamic Thunder Sound 2400mAh Battery 10 W Bluetooth Soundbar", 
+            price: 999, 
+            discount: 70,
+            rating: 4.0, reviews: "1,100",
+            image: "https://rukminim2.flixcart.com/image/416/416/xif0q/speaker/soundbar/4/f/6/m423sp-portable-home-tv-dynamic-thunder-sound-2400mah-battery-mz-original-imahgg7hcusyp3dn.jpeg?q=70&crop=false"
+        },
+        { 
+            id: 42, 
+            category: "Speakers", 
+            name: "Nu Republic 20", 
+            fullName: "Nu Republic 20 Upto 12 hrs Playtime with 52 mm Dynamic Drivers & X-BassTech 20 W Bluetooth Speaker", 
+            price: 1999, 
+            discount: 60,
+            rating: 4.5, reviews: "900",
+            image: "https://rukminim2.flixcart.com/image/416/416/xif0q/speaker/mobile-tablet-speaker/f/h/c/soundbar-20-upto-10-hrs-playtime-with-52-mm-dynamic-drivers-x-original-imah2tztkyyhngf4.jpeg?q=70&crop=false"
+        },
+        { 
+            id: 43, 
+            category: "Speakers", 
+            name: "Egate C 210", 
+            fullName: "Egate C 210 RGB Light | Upto 15 Hrs Backup 2000mAh | Dual Drivers & Passive Radiator 20 W Bluetooth Speaker", 
+            price: 1299, 
+            discount: 55,
+            rating: 4.2, reviews: "450",
+            image: "https://rukminim2.flixcart.com/image/416/416/xif0q/speaker/soundbar/l/s/q/210-dual-passive-radiator-for-2x-bass-upto-12-hrs-playback-2000-original-imahbj4hzj8zatvc.jpeg?q=70&crop=false"
+        },
+        { 
+            id: 44, 
+            category: "Speakers", 
+            name: "Nu Republic Party Box", 
+            fullName: "Nu Republic Party Box 16 With X-Bass®Technology, Upto 10 Hrs Playtime, Multiple RGB Modes, 16 W Bluetooth Speaker", 
+            price: 2499, 
+            discount: 50,
+            rating: 4.3, reviews: "600",
+            image: "https://rukminim2.flixcart.com/image/416/416/xif0q/speaker/f/f/m/-original-imahdhswhswa6zsv.jpeg?q=70&crop=false"
+        },
+        { 
+            id: 45, 
+            category: "Speakers", 
+            name: "Hammer Wave 10W", 
+            fullName: "Hammer Wave 10W Speaker with Twin Pairing, 8 Hours Playtime, Made in India 10 W Bluetooth Speaker", 
+            price: 1899, 
+            discount: 40,
+            rating: 4.1, reviews: "750",
+            image: "https://rukminim2.flixcart.com/image/416/416/xif0q/speaker/mobile-tablet-speaker/y/k/k/wave-hbts004-hammer-original-imahggrcuawwccrq.jpeg?q=70&crop=false"
+        },
+        { 
+            id: 46, 
+            category: "Speakers", 
+            name: "boAt Stone 310", 
+            fullName: "boAt Stone 310, 16 Hrs Playback, 45mm Drivers, TWS Connectivity 5 W Bluetooth Speaker", 
+            price: 1199, 
+            discount: 45,
+            rating: 4.4, reviews: "5,000",
+            image: "https://rukminim2.flixcart.com/image/416/416/xif0q/speaker/6/v/z/-original-imahgf2yhph5suzs.jpeg?q=70&crop=false"
         }
     ];
 
@@ -1070,17 +1254,65 @@
     let cart = []; 
     let isCartOrder = false; 
     let currentOrderID = "";
-    let isCouponApplied = false; // Track coupon state
+    let isCouponApplied = false; 
 
-    // Modified to use specific product discount
+    // --- DYNAMIC DISCOUNT LOGIC ---
     function getDiscountedPrice(product) { 
-        if(!product || !product.discount) return product.price; // Fallback
-        return Math.floor(product.price * (100 - product.discount) / 100); 
+        let baseDiscount = product.discount;
+        let finalDiscount = baseDiscount + globalDiscountModifier;
+        
+        // Safety cap
+        if(finalDiscount > 99) finalDiscount = 99;
+        if(finalDiscount < 0) finalDiscount = 0;
+
+        return Math.floor(product.price * (100 - finalDiscount) / 100); 
+    }
+
+    // --- TIME CYCLE LOGIC ---
+    function updateSaleCycle() {
+        const now = Math.floor(Date.now() / 1000); // Current time in seconds
+        const cycleDuration = 3600; // 60 minutes in seconds
+        
+        // Calculate Global Cycle Index (How many hours since Epoch)
+        const currentCycleIndex = Math.floor(now / cycleDuration);
+        
+        // Rotation Logic: 0 -> +2%, 1 -> +5%, 2 -> -5%
+        const rotationState = currentCycleIndex % 3;
+        
+        if(rotationState === 0) {
+            globalDiscountModifier = 2; // Cycle 1
+        } else if(rotationState === 1) {
+            globalDiscountModifier = 5; // Cycle 2
+        } else {
+            globalDiscountModifier = -5; // Cycle 3
+        }
+
+        // Check for new cycle to show popup
+        if(lastCycleIndex !== -1 && currentCycleIndex > lastCycleIndex) {
+            showSalePopup();
+            renderProducts(); // Refresh prices
+        }
+        
+        lastCycleIndex = currentCycleIndex;
+
+        // Timer Update
+        const secondsLeft = cycleDuration - (now % cycleDuration);
+        const m = Math.floor(secondsLeft / 60).toString().padStart(2, '0');
+        const s = (secondsLeft % 60).toString().padStart(2, '0');
+        document.getElementById('timer').innerText = `${m}:${s}`;
+    }
+
+    function showSalePopup() {
+        const popup = document.getElementById('sale-popup');
+        popup.style.display = 'flex';
+    }
+
+    function closeSalePopup() {
+        document.getElementById('sale-popup').style.display = 'none';
     }
 
     // Helper to get specs based on category
     function getSpecsForProduct(product) {
-        // [Existing Specs Logic] - Re-added fully
         const specs = {
             "Earbuds": [
                 { key: "Model Name", val: product.name },
@@ -1133,6 +1365,14 @@
                 { key: "Trimming Range", val: "0.5 - 20 mm" },
                 { key: "Battery Run Time", val: "60 Mins" },
                 { key: "Sales Package", val: "Trimmer, Oil, Brush, Charger" }
+            ],
+            "Speakers": [
+                { key: "Model Name", val: product.name },
+                { key: "Type", val: "Bluetooth Speaker" },
+                { key: "Connectivity", val: "Bluetooth, Aux, USB" },
+                { key: "Power Output", val: "10W - 48W" },
+                { key: "Battery Life", val: "Up to 10 Hours" },
+                { key: "Features", val: "Deep Bass, RGB Lights (Select Models)" }
             ]
         };
         // Fallback for categories not explicitly listed
@@ -1182,12 +1422,19 @@
         }
     }
 
-    function openCart() {
+    // --- UPDATED: openCart to show Price Details ---
+    function openCart(e) {
+        if(e) e.preventDefault(); 
+        
         const modal = document.getElementById('cartModal');
         const container = document.getElementById('cart-items-container');
         const footer = document.getElementById('cart-footer');
         const priceDetailsBox = document.getElementById('cart-price-details');
         
+        try {
+            history.pushState({modal: 'cart'}, null, '');
+        } catch(err) { console.log("History API not supported"); }
+
         document.getElementById('cart-count-header').innerText = `(${cart.length})`;
         container.innerHTML = '';
 
@@ -1214,13 +1461,14 @@
                         <img src="${item.image}" onerror="this.src='https://placehold.co/100?text=Icon'">
                         <div class="cart-item-details">
                             <div class="cart-item-title">${item.fullName}</div>
-                            <div class="cart-item-price">₹${itemPrice} <span style="font-size:10px; color:green; font-weight:normal;">(${item.discount}% OFF)</span></div>
+                            <div class="cart-item-price">₹${itemPrice} <span style="font-size:10px; color:green; font-weight:normal;">(Extra Discount Applied)</span></div>
                             <div class="cart-remove-btn" onclick="removeFromCart(${index})">Remove</div>
                         </div>
                     </div>
                 `;
             });
             
+            // Update Price Details Box in Cart
             priceDetailsBox.innerHTML = `
                 <h4>PRICE DETAILS</h4>
                 <div class="price-row">
@@ -1246,10 +1494,14 @@
         }
         modal.style.display = 'flex';
     }
+    
+    function closeCartModal() {
+        document.getElementById('cartModal').style.display = 'none';
+    }
 
     function removeFromCart(index) {
         cart.splice(index, 1);
-        openCart(); // Re-render
+        openCart(); 
         updateCartCount();
     }
 
@@ -1352,7 +1604,10 @@
         currentPrice = getDiscountedPrice(product);
         isCartOrder = false;
         
-        // Reset Coupon State
+        try {
+            history.pushState({modal: 'product'}, null, '');
+        } catch(err) { console.log("History API not supported"); }
+        
         isCouponApplied = false;
         const couponBtn = document.getElementById('coupon-btn');
         if(couponBtn) {
@@ -1364,7 +1619,6 @@
         document.getElementById('home-view').style.display = 'none';
         document.getElementById('timer-section').style.display = 'none';
         
-        // --- FIX: Remove hidden class correctly ---
         const detailView = document.getElementById('product-detail-view');
         detailView.classList.remove('hidden');
         detailView.style.display = 'block';
@@ -1374,7 +1628,6 @@
         
         document.getElementById('detail-title').innerText = product.fullName;
         
-        // NEW PRICE FORMAT
         document.getElementById('detail-price').innerText = `₹${currentPrice}`;
         document.getElementById('detail-price').style.color = '#212121'; // Reset Color
         document.getElementById('detail-old-price').innerText = `₹${product.price}`;
@@ -1457,6 +1710,11 @@
 
     // CHECKOUT LOGIC WITH STEPPER
     function startCheckout() {
+        // PUSH STATE FOR BACK BUTTON
+        try {
+            history.pushState({modal: 'checkout'}, null, '');
+        } catch(err) { console.log("History API not supported"); }
+
         // Reset Steps
         document.querySelectorAll('.step-item').forEach(el => {
             el.classList.remove('active', 'completed');
@@ -1695,13 +1953,52 @@
 
     // INIT
     document.addEventListener('DOMContentLoaded', () => {
+        // HISTORY STATE INITIALIZATION
+        try {
+            history.pushState(null, null, window.location.href);
+        } catch(err) { console.log("History API not supported"); }
+
+        window.addEventListener('popstate', function(event) {
+            // Check what is open
+            const cart = document.getElementById('cartModal');
+            const checkout = document.getElementById('checkoutModal');
+            const detail = document.getElementById('product-detail-view');
+            const utr = document.getElementById('utrModal');
+            const success = document.getElementById('successModal');
+
+            let handled = false;
+
+            if (utr.style.display === 'flex') {
+                utr.style.display = 'none';
+                handled = true;
+            } else if (success.style.display === 'flex') {
+                success.style.display = 'none';
+                handled = true;
+            } else if (checkout.style.display === 'flex') {
+                closeModal(); // Reuse existing function
+                handled = true;
+            } else if (cart.style.display === 'flex') {
+                cart.style.display = 'none';
+                handled = true;
+            } else if (detail.style.display === 'block' && !detail.classList.contains('hidden')) {
+                goHome(); // Reuse existing function
+                handled = true;
+            }
+
+            // Always push state back to trap the user on the page (App-like behavior)
+            // This prevents the browser from actually going back to the previous page
+            try {
+                history.pushState(null, null, window.location.href);
+            } catch(err) { console.log("History API not supported"); }
+        });
+
         renderCategories();
+        
+        // Start Sale Cycle Check
+        updateSaleCycle();
+        setInterval(updateSaleCycle, 1000); // Check every second for timer update & cycle shift
+        
         renderProducts();
-        setInterval(() => {
-            const now = Math.floor(Date.now() / 1000);
-            const left = (8 * 60) - (now % (8 * 60));
-            document.getElementById('timer').innerText = `${Math.floor(left/60).toString().padStart(2,'0')}:${(left%60).toString().padStart(2,'0')}`;
-        }, 1000);
         
         const loginBtn = document.querySelector('.login-btn');
         if(loginBtn) loginBtn.addEventListener('click', () => { showToast("You are already logged in!"); });
