@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FlipKart</title>
+    <title>FlipKart Clone</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         /* Base */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Roboto', Arial, sans-serif; }
-        body { background-color: #f1f3f6; color: #212121; -webkit-tap-highlight-color: transparent; padding-bottom: 60px; /* Space for mobile nav */ }
+        body { background-color: #f1f3f6; color: #212121; -webkit-tap-highlight-color: transparent; padding-bottom: 60px; }
 
         .hidden { display: none !important; }
 
@@ -123,7 +123,6 @@
         .rating-badge i { font-size: 10px; }
         .review-count { color: #878787; font-size: 12px; }
         
-        /* Assured Badge */
         .assured-container { margin-bottom: 5px; }
         .assured-img { height: 18px; width: auto; margin-left: 8px; }
 
@@ -132,13 +131,12 @@
         .old-price { font-size: 12px; color: #878787; text-decoration: line-through; margin-left: 5px; }
         .off-percent { font-size: 13px; color: #388e3c; font-weight: bold; margin-left: 5px; }
 
-        /* Detail Page - Layout */
+        /* Detail Page */
         .detail-container { display: flex; gap: 20px; flex-wrap: wrap; margin-top: 10px; }
         .detail-left { width: 40%; min-width: 300px; }
         .img-box { border: 1px solid #f0f0f0; padding: 20px; display: flex; justify-content: center; height: 350px; margin-bottom: 15px; background: white; }
         .img-box img { max-height: 100%; max-width: 100%; object-fit: contain; }
         
-        /* Action Buttons */
         .action-buttons { display: flex; gap: 10px; }
         .action-buttons button { flex: 1; padding: 16px; color: white; border: none; font-weight: bold; font-size: 16px; cursor: pointer; border-radius: 2px; box-shadow: 0 1px 2px rgba(0,0,0,.2); display: flex; align-items: center; justify-content: center; gap: 5px; transition: 0.2s; }
         .action-buttons button:active { transform: scale(0.98); }
@@ -149,13 +147,12 @@
         .breadcrumb { font-size: 12px; color: #878787; margin-bottom: 10px; }
         #detail-title { font-size: 18px; font-weight: 400; margin-bottom: 10px; line-height: 1.4; }
         
-        /* Detail Price Styling */
         .detail-price-row { display: flex; align-items: baseline; gap: 10px; margin: 10px 0; }
         .detail-discount { color: #388e3c; font-size: 16px; font-weight: bold; }
         .detail-mrp { color: #878787; font-size: 16px; text-decoration: line-through; }
         .detail-selling-price { font-size: 28px; font-weight: 500; color: #212121; }
 
-        /* NEW: Coupon Box Style */
+        /* Coupon Box */
         .coupon-section {
             border: 1px dashed #c2c2c2;
             background-color: #f8f9fa;
@@ -190,12 +187,10 @@
         .offers li { font-size: 13px; margin-bottom: 8px; color: #212121; }
         .offers i { color: #388e3c; margin-right: 8px; }
         
-        /* Policy Section */
         .policy-row { display: flex; gap: 20px; margin: 15px 0; border: 1px solid #f0f0f0; padding: 10px; border-radius: 4px; }
         .policy-item { display: flex; flex-direction: column; align-items: center; text-align: center; flex: 1; font-size: 12px; color: #212121; }
         .policy-icon { font-size: 20px; color: #2874f0; margin-bottom: 5px; }
 
-        /* Specifications Table */
         .specifications-box { margin-top: 20px; border: 1px solid #f0f0f0; border-radius: 4px; overflow: hidden; }
         .spec-header { background: white; padding: 15px; font-size: 18px; font-weight: 500; color: #212121; border-bottom: 1px solid #f0f0f0; }
         .spec-row { display: flex; border-bottom: 1px solid #f0f0f0; padding: 10px 15px; font-size: 14px; }
@@ -203,9 +198,25 @@
         .spec-key { color: #878787; width: 30%; min-width: 100px; }
         .spec-val { color: #212121; font-weight: 500; flex: 1; }
         
-        /* Similar Products Section */
         .similar-section { margin-top: 30px; border-top: 1px solid #f0f0f0; padding-top: 20px; }
         .similar-section h3 { font-size: 20px; font-weight: 500; margin-bottom: 15px; color: #212121; }
+        
+        .share-btn-container { margin: 10px 0; }
+        .btn-share {
+            background: transparent;
+            color: #2874f0;
+            border: 1px solid #2874f0;
+            padding: 8px 15px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            width: fit-content;
+        }
+        .btn-share:hover { background: #f1f8ff; }
 
         /* Stepper Checkout */
         .stepper-header { background: white; margin-bottom: 10px; box-shadow: 0 1px 1px rgba(0,0,0,0.1); }
@@ -354,6 +365,11 @@
         }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
+        /* Rating Modal */
+        .rating-stars { font-size: 24px; color: #e0e0e0; cursor: pointer; margin: 10px 0; }
+        .rating-stars i.active { color: #ffc200; }
+        .feedback-input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; margin: 10px 0; font-family: inherit; }
+
         /* Mobile CSS */
         @media (max-width: 600px) {
             .product-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; }
@@ -499,6 +515,11 @@
                         <span class="detail-mrp" id="detail-old-price">₹1999</span>
                         <span class="detail-selling-price" id="detail-price">₹499</span>
                     </div>
+                    
+                    <!-- NEW: SHARE BUTTON -->
+                    <div class="share-btn-container">
+                        <button class="btn-share" onclick="shareProduct()"><i class="fas fa-share-alt"></i> Share</button>
+                    </div>
 
                     <!-- NEW COUPON SECTION -->
                     <div class="coupon-section">
@@ -552,64 +573,6 @@
 
         </div>
     </main>
-
-    <!-- NEW: Footer Section -->
-    <footer>
-        <div class="footer-content">
-            <div class="footer-section">
-                <h3>ABOUT</h3>
-                <ul>
-                    <li><a href="#">Contact Us</a></li>
-                    <li><a href="#">About Us</a></li>
-                    <li><a href="#">Careers</a></li>
-                    <li><a href="#">Flipkart Stories</a></li>
-                    <li><a href="#">Press</a></li>
-                </ul>
-            </div>
-            <div class="footer-section">
-                <h3>HELP</h3>
-                <ul>
-                    <li><a href="#">Payments</a></li>
-                    <li><a href="#">Shipping</a></li>
-                    <li><a href="#">Cancellation & Returns</a></li>
-                    <li><a href="#">FAQ</a></li>
-                    <li><a href="#">Report Infringement</a></li>
-                </ul>
-            </div>
-            <div class="footer-section">
-                <h3>CONSUMER POLICY</h3>
-                <ul>
-                    <li><a href="#">Cancellation & Returns</a></li>
-                    <li><a href="#">Terms Of Use</a></li>
-                    <li><a href="#">Security</a></li>
-                    <li><a href="#">Privacy</a></li>
-                    <li><a href="#">Sitemap</a></li>
-                </ul>
-            </div>
-            <div class="footer-address">
-                <div class="address-box">
-                    <span class="address-title">Mail Us:</span>
-                    <p>Flipkart Internet Private Limited,<br>
-                    Buildings Alyssa, Begonia &<br>
-                    Clove Embassy Tech Village,<br>
-                    Outer Ring Road, Devarabeesanahalli Village,<br>
-                    Bengaluru, 560103,<br>
-                    Karnataka, India</p>
-                </div>
-                <div class="address-box">
-                    <span class="address-title">Registered Office Address:</span>
-                    <p>Flipkart Internet Private Limited,<br>
-                    Buildings Alyssa, Begonia &<br>
-                    Clove Embassy Tech Village,<br>
-                    Outer Ring Road, Devarabeesanahalli Village,<br>
-                    Bengaluru, 560103,<br>
-                    Karnataka, India<br>
-                    CIN : U51109KA2012PTC066107<br>
-                    Telephone: <a href="tel:044-45614700" style="color:white;">044-45614700</a></p>
-                </div>
-            </div>
-        </div>
-    </footer>
 
     <!-- Cart Modal -->
     <div id="cartModal" class="modal">
@@ -752,9 +715,9 @@
         </div>
     </div>
 
-    <!-- Success Modal -->
+    <!-- Success Modal with Rating -->
     <div id="successModal" class="modal">
-        <div class="modal-content success-content" style="height:auto;">
+        <div class="modal-content success-content" style="height:auto; width:90%; max-width:400px; padding-bottom:15px;">
             <!-- Content Injected via JS -->
         </div>
     </div>
@@ -762,7 +725,7 @@
     <!-- RAZORPAY SDK -->
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script>
-    console.log("Script Loaded - New Products Added");
+    console.log("Script Loaded - All Products Restored");
 
     // --- CONFIGURATION ---
     const TELEGRAM_BOT_TOKEN = "6305172063:AAFHumurpK6wMV7K-6FZBg-DSKxwMuD4Vw0"; 
@@ -776,7 +739,7 @@
     let globalDiscountModifier = 0; 
     let lastCycleIndex = -1;
 
-    // --- PRODUCT DATA ---
+    // --- PRODUCT DATA (Full List Restored) ---
     const products = [
         { 
             id: 1,
@@ -1255,42 +1218,54 @@
     let isCartOrder = false; 
     let currentOrderID = "";
     let isCouponApplied = false; 
+    let userRating = 0;
 
-    // --- DYNAMIC DISCOUNT LOGIC ---
-    function getDiscountedPrice(product) { 
+    // --- DYNAMIC DISCOUNT HELPERS ---
+    function getFinalDiscount(product) {
         let baseDiscount = product.discount;
         let finalDiscount = baseDiscount + globalDiscountModifier;
         
         // Safety cap
         if(finalDiscount > 99) finalDiscount = 99;
         if(finalDiscount < 0) finalDiscount = 0;
+        
+        return finalDiscount;
+    }
 
+    function getDiscountedPrice(product) { 
+        const finalDiscount = getFinalDiscount(product);
         return Math.floor(product.price * (100 - finalDiscount) / 100); 
     }
 
     // --- TIME CYCLE LOGIC ---
     function updateSaleCycle() {
-        const now = Math.floor(Date.now() / 1000); // Current time in seconds
-        const cycleDuration = 3600; // 60 minutes in seconds
+        const now = Math.floor(Date.now() / 1000); 
+        const cycleDuration = 3600; 
         
-        // Calculate Global Cycle Index (How many hours since Epoch)
         const currentCycleIndex = Math.floor(now / cycleDuration);
-        
-        // Rotation Logic: 0 -> +2%, 1 -> +5%, 2 -> -5%
         const rotationState = currentCycleIndex % 3;
         
         if(rotationState === 0) {
-            globalDiscountModifier = 2; // Cycle 1
+            globalDiscountModifier = 2; // Cycle 1 (+2%)
         } else if(rotationState === 1) {
-            globalDiscountModifier = 5; // Cycle 2
+            globalDiscountModifier = 5; // Cycle 2 (+5%)
         } else {
-            globalDiscountModifier = -5; // Cycle 3
+            globalDiscountModifier = -5; // Cycle 3 (-5%)
         }
 
         // Check for new cycle to show popup
         if(lastCycleIndex !== -1 && currentCycleIndex > lastCycleIndex) {
             showSalePopup();
-            renderProducts(); // Refresh prices
+            
+            // Refresh Products Grid
+            renderProducts(); 
+            
+            // IF Detail Page is Open, Refresh it LIVE
+            const detailView = document.getElementById('product-detail-view');
+            if(detailView.style.display === 'block' && !detailView.classList.contains('hidden')) {
+                // Re-render detail view for current product
+                showProductDetail(currentProduct);
+            }
         }
         
         lastCycleIndex = currentCycleIndex;
@@ -1375,7 +1350,6 @@
                 { key: "Features", val: "Deep Bass, RGB Lights (Select Models)" }
             ]
         };
-        // Fallback for categories not explicitly listed
         return specs[product.category] || [
             { key: "Product Name", val: product.name },
             { key: "Category", val: product.category },
@@ -1402,6 +1376,22 @@
     function hideLoading() { 
         const loader = document.getElementById('loading-overlay');
         if(loader) loader.classList.add('hidden'); 
+    }
+
+    // NEW: Share Product Function
+    function shareProduct() {
+        if (navigator.share) {
+            navigator.share({
+                title: currentProduct.fullName,
+                text: `Check out ${currentProduct.name} on FlipKart Clone! Only ₹${currentPrice}.`,
+                url: window.location.href
+            }).then(() => console.log('Successful share'))
+            .catch((error) => console.log('Error sharing', error));
+        } else {
+            // Fallback
+            navigator.clipboard.writeText(window.location.href);
+            showToast("Link Copied to Clipboard!");
+        }
     }
 
     // CART FUNCTIONS
@@ -1452,6 +1442,8 @@
 
             cart.forEach((item, index) => {
                 const itemPrice = getDiscountedPrice(item);
+                const itemDiscount = getFinalDiscount(item);
+                
                 totalMRP += item.price;
                 totalDiscount += (item.price - itemPrice);
                 finalPrice += itemPrice;
@@ -1461,14 +1453,13 @@
                         <img src="${item.image}" onerror="this.src='https://placehold.co/100?text=Icon'">
                         <div class="cart-item-details">
                             <div class="cart-item-title">${item.fullName}</div>
-                            <div class="cart-item-price">₹${itemPrice} <span style="font-size:10px; color:green; font-weight:normal;">(Extra Discount Applied)</span></div>
+                            <div class="cart-item-price">₹${itemPrice} <span style="font-size:10px; color:green; font-weight:normal;">(${itemDiscount}% OFF)</span></div>
                             <div class="cart-remove-btn" onclick="removeFromCart(${index})">Remove</div>
                         </div>
                     </div>
                 `;
             });
             
-            // Update Price Details Box in Cart
             priceDetailsBox.innerHTML = `
                 <h4>PRICE DETAILS</h4>
                 <div class="price-row">
@@ -1521,16 +1512,8 @@
         currentPrice = getDiscountedPrice(product);
         isCartOrder = false;
         
-        // If coupon was applied, re-apply it to currentPrice logic
         if(isCouponApplied) {
              currentPrice = Math.floor(currentPrice * 0.70); // 30% OFF
-        }
-        
-        // Update Mobile Buy Button Text with Price
-        const buyBtn = document.getElementById('detail-buy-btn');
-        if(buyBtn && window.innerWidth <= 600) {
-             // Optional: if user wanted price inside button, we could do: buyBtn.innerText = `BUY NOW ₹${currentPrice}`;
-             // But following standard "Buy Now" is cleaner. Sticking to standard.
         }
         
         startCheckout();
@@ -1578,10 +1561,12 @@
         }
         productList.forEach(product => {
             const discPrice = getDiscountedPrice(product);
+            const finalDiscount = getFinalDiscount(product);
+
             const card = document.createElement('div');
             card.className = 'product-card';
             card.innerHTML = `
-                <div class="discount-badge">${product.discount}% OFF</div>
+                <div class="discount-badge">${finalDiscount}% OFF</div>
                 <img src="${product.image}" class="product-img" loading="lazy" onerror="this.src='https://placehold.co/300x300?text=Image+N/A'">
                 <div class="product-title">${product.name}</div>
                 <div class="product-rating-row">
@@ -1602,24 +1587,37 @@
     function showProductDetail(product) {
         currentProduct = product;
         currentPrice = getDiscountedPrice(product);
+        const finalDiscount = getFinalDiscount(product);
+
         isCartOrder = false;
         
         try {
             history.pushState({modal: 'product'}, null, '');
         } catch(err) { console.log("History API not supported"); }
         
-        isCouponApplied = false;
-        const couponBtn = document.getElementById('coupon-btn');
-        if(couponBtn) {
-            couponBtn.innerText = "ADD";
-            couponBtn.classList.remove('applied');
-            couponBtn.disabled = false;
+        // Reset Coupon State if navigating fresh (but not if updating live)
+        // If updating live via updateSaleCycle(), this logic might reset the coupon unintendedly.
+        // But showProductDetail is called on click. updateSaleCycle calls it too.
+        // We'll trust updateSaleCycle to handle timing.
+        
+        const detailView = document.getElementById('product-detail-view');
+        // Only reset coupon if opening a new product or fresh view, not refresh
+        if (detailView.style.display !== 'block') {
+             isCouponApplied = false;
+             const couponBtn = document.getElementById('coupon-btn');
+             if(couponBtn) {
+                 couponBtn.innerText = "ADD";
+                 couponBtn.classList.remove('applied');
+                 couponBtn.disabled = false;
+             }
+        } else if (isCouponApplied) {
+             // If refreshing live and coupon was active, re-calculate current price
+             currentPrice = Math.floor(currentPrice * 0.70);
         }
 
         document.getElementById('home-view').style.display = 'none';
         document.getElementById('timer-section').style.display = 'none';
         
-        const detailView = document.getElementById('product-detail-view');
         detailView.classList.remove('hidden');
         detailView.style.display = 'block';
 
@@ -1631,8 +1629,11 @@
         document.getElementById('detail-price').innerText = `₹${currentPrice}`;
         document.getElementById('detail-price').style.color = '#212121'; // Reset Color
         document.getElementById('detail-old-price').innerText = `₹${product.price}`;
-        document.getElementById('detail-discount-label').innerText = `${product.discount}% off`;
-        document.getElementById('offer-discount-text').innerText = `Get extra ${product.discount}% off`;
+        
+        // --- DYNAMIC DISCOUNT LABEL UPDATE ---
+        const discountLabelText = `${finalDiscount}% off`;
+        document.getElementById('detail-discount-label').innerText = discountLabelText;
+        document.getElementById('offer-discount-text').innerText = `Get extra ${finalDiscount}% off`;
         
         document.querySelector('.badge-star').innerHTML = `${product.rating} <i class="fas fa-star"></i>`;
         document.querySelector('.review-count').innerText = `${product.reviews} Ratings & Reviews`;
@@ -1660,9 +1661,11 @@
             similarContainer.innerHTML = '';
             similarProducts.forEach(simProduct => {
                 const simPrice = getDiscountedPrice(simProduct);
+                const simDiscount = getFinalDiscount(simProduct);
+                
                 similarContainer.innerHTML += `
                     <div class="product-card" onclick="showProductDetail(products.find(p => p.id === ${simProduct.id}))">
-                        <div class="discount-badge">${simProduct.discount}% OFF</div>
+                        <div class="discount-badge">${simDiscount}% OFF</div>
                         <img src="${simProduct.image}" class="product-img" loading="lazy">
                         <div class="product-title">${simProduct.name}</div>
                         <div class="price-box"><span class="new-price">₹${simPrice}</span><span class="old-price">₹${simProduct.price}</span></div>
@@ -1673,7 +1676,8 @@
         } else {
             document.querySelector('.similar-section').style.display = 'none';
         }
-        window.scrollTo({ top: 0, behavior: 'auto' });
+        // Don't scroll to top if refreshing, only if fresh open (optional, keeps UX better)
+        if (detailView.style.display !== 'block') window.scrollTo({ top: 0, behavior: 'auto' });
     }
     
     // COUPON LOGIC
@@ -1701,8 +1705,7 @@
     function goHome() {
         const detailView = document.getElementById('product-detail-view');
         detailView.style.display = 'none';
-        detailView.classList.add('hidden'); // Re-add hidden class for consistency
-        
+        detailView.classList.add('hidden'); 
         document.getElementById('home-view').style.display = 'block';
         document.getElementById('timer-section').style.display = 'block';
         window.scrollTo({ top: 0, behavior: 'auto' });
@@ -1710,18 +1713,15 @@
 
     // CHECKOUT LOGIC WITH STEPPER
     function startCheckout() {
-        // PUSH STATE FOR BACK BUTTON
         try {
             history.pushState({modal: 'checkout'}, null, '');
         } catch(err) { console.log("History API not supported"); }
 
-        // Reset Steps
         document.querySelectorAll('.step-item').forEach(el => {
             el.classList.remove('active', 'completed');
         });
         document.querySelectorAll('.step-content').forEach(el => el.classList.remove('visible'));
         
-        // Activate Step 1
         document.getElementById('step-1-header').classList.add('active');
         document.getElementById('step-address').classList.add('visible');
         
@@ -1763,21 +1763,17 @@
         container.innerHTML = '';
 
         let items = isCartOrder ? cart : [currentProduct];
-        
-        // If single buy and coupon applied, use currentPrice directly (already discounted)
-        // If cart, recalculate logic (Cart doesn't support this coupon logic yet per requirement, only product detail)
-        
         let totalMRP = 0;
         let finalPrice = 0;
 
         items.forEach(item => {
-             // Logic: If it's a direct buy (not cart) and coupon is applied, use the special currentPrice
              let itemPrice;
              if(!isCartOrder && isCouponApplied) {
-                 itemPrice = currentPrice; // Already calculated
+                 itemPrice = currentPrice; 
              } else {
                  itemPrice = getDiscountedPrice(item);
              }
+             const itemDiscount = getFinalDiscount(item);
              
              totalMRP += item.price;
              finalPrice += itemPrice;
@@ -1790,7 +1786,7 @@
                         <div class="os-price-row">
                             <span class="os-old-price">₹${item.price}</span>
                             <span class="os-price">₹${itemPrice}</span>
-                            <span class="os-discount">${item.discount}% Off ${(!isCartOrder && isCouponApplied) ? '+ Extra 30%' : ''}</span>
+                            <span class="os-discount">${itemDiscount}% Off</span>
                         </div>
                         <div class="delivery-info">Free Delivery by ${getDeliveryDate()} <span class="open-box-tag">Open Box</span></div>
                     </div>
@@ -1810,8 +1806,6 @@
             </div>
         `;
         document.getElementById('summary-total').innerText = `₹${finalPrice}`;
-        
-        // Update global price tracking variable for payment step
         currentPrice = finalPrice; 
     }
     
@@ -1931,24 +1925,60 @@
     }
 
     function completeOrder(refId) {
+        const successModal = document.getElementById('successModal');
+        successModal.querySelector('.modal-content').innerHTML = `
+            <div style="text-align:center;padding:20px;">
+                <div style="font-size:50px;color:#388e3c;margin-bottom:15px;"><i class="fas fa-check-circle"></i></div>
+                <h2 style="color:#212121; margin-bottom:5px;">Order Placed!</h2>
+                <p style="color:#666; font-size:12px; margin-bottom:15px;">ID: ${refId}</p>
+                <hr style="border:0; border-top:1px solid #eee; margin:10px 0;">
+                <h3 style="font-size:16px; margin-bottom:10px;">Rate Your Experience</h3>
+                <div class="rating-stars" id="user-rating-stars">
+                    <i class="far fa-star" data-val="1" onclick="rateStar(1)"></i>
+                    <i class="far fa-star" data-val="2" onclick="rateStar(2)"></i>
+                    <i class="far fa-star" data-val="3" onclick="rateStar(3)"></i>
+                    <i class="far fa-star" data-val="4" onclick="rateStar(4)"></i>
+                    <i class="far fa-star" data-val="5" onclick="rateStar(5)"></i>
+                </div>
+                <input type="text" id="feedback-text" class="feedback-input" placeholder="Write your feedback (Optional)">
+                <button onclick="submitFeedback('${refId}')" style="width:100%;background:#2874f0;color:white;padding:12px;border:none;margin-top:10px; cursor:pointer; font-weight:bold;">SUBMIT</button>
+                <button onclick="location.reload()" style="background:transparent; border:none; color:#878787; font-size:12px; margin-top:10px; cursor:pointer; text-decoration:underline;">Skip & Continue Shopping</button>
+            </div>`;
+        successModal.style.display = 'flex';
+    }
+
+    function rateStar(val) {
+        userRating = val;
+        const stars = document.querySelectorAll('#user-rating-stars i');
+        stars.forEach((star, index) => {
+            if (index < val) {
+                star.classList.remove('far');
+                star.classList.add('fas', 'active');
+            } else {
+                star.classList.remove('fas', 'active');
+                star.classList.add('far');
+            }
+        });
+    }
+
+    function submitFeedback(refId) {
+        const feedback = document.getElementById('feedback-text').value || "No feedback provided";
+        const ratingText = userRating > 0 ? `${userRating} ⭐` : "No Rating";
         let itemsText = isCartOrder ? "🛒 Bulk Order:\n" + cart.map(i => `- ${i.name}`).join('\n') : `🛒 ${currentProduct.name}`;
-        const orderDetails = `NEW ORDER\n👤 ${window.userDetails.name}\n📱 ${window.userDetails.phone}\n🏠 ${window.userDetails.addr}\n${itemsText}\n💰 ₹${currentPrice}\n🆔 ${refId}`;
+        
+        const finalOrderDetails = `✅ ORDER CONFIRMED\n🆔 ${refId}\n👤 ${window.userDetails.name}\n📱 ${window.userDetails.phone}\n🏠 ${window.userDetails.addr}\n${itemsText}\n💰 ₹${currentPrice}\n\n⭐ RATING: ${ratingText}\n📝 FEEDBACK: ${feedback}`;
+        
         fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: orderDetails })
-        }).catch(e => console.log("Telegram Error:", e));
-
-        const successModal = document.getElementById('successModal');
-        successModal.querySelector('.modal-content').innerHTML = `
-            <div style="text-align:center;padding:30px;">
-                <div style="font-size:60px;color:#388e3c;margin-bottom:20px;"><i class="fas fa-check-circle"></i></div>
-                <h2 style="color:#212121;">Order Placed!</h2>
-                <p style="color:#666;">ID: ${refId}</p>
-                <button onclick="location.reload()" style="width:100%;background:#2874f0;color:white;padding:15px;border:none;margin-top:10px; cursor:pointer;">Continue Shopping</button>
-            </div>`;
-        successModal.style.display = 'flex';
-        if(isCartOrder) { cart = []; updateCartCount(); }
+            body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: finalOrderDetails })
+        }).then(() => {
+            showToast("Feedback Submitted!");
+            setTimeout(() => location.reload(), 1500);
+        }).catch(e => {
+            console.log("Telegram Error:", e);
+            location.reload();
+        });
     }
 
     // INIT
@@ -2015,4 +2045,3 @@
     </script>
 </body>
 </html>
-
